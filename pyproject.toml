@@ -18,6 +18,7 @@ rdkit = "^2023.9.5"
 matplotlib = "^3.8.4"
 loguru = "^0.7.2"
 tqdm = "^4.66.2"
+seaborn = "^0.13.2"
 
 
 [build-system]

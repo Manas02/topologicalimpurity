@@ -1,4 +1,5 @@
 import os
+import sys
 import numpy as np
 import pandas as pd
 import networkx as nx
@@ -8,8 +9,10 @@ from molecularnetwork import MolecularNetwork
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import accuracy_score, balanced_accuracy_score, f1_score, precision_score, recall_score, roc_auc_score
 
-from tree import TopologicalDecisionTreeClassifier
+from tdt import TopologicalDecisionTreeClassifier
 
+logger.remove()  # Remove any previous configurations
+logger.add(sys.stdout, level="ERROR")  # Add stdout with INFO level
 
 # Define a function to evaluate the models and store metrics
 def evaluate_models(dataset_name, X_train, y_train, A_train, X_test, y_test):
@@ -52,7 +55,7 @@ def preprocess_data(df):
     train_df = df[df["split"] == "train"]
     train_smiles_list = train_df["canonical_smiles"].values
     train_classes = train_df["active"].values
-    network = MolecularNetwork(descriptor="morgan2", sim_metric="tanimoto", sim_threshold=0.5)
+    network = MolecularNetwork(descriptor="morgan2", sim_metric="tanimoto", sim_threshold=0.7)
     graph = network.create_graph(train_smiles_list, train_classes)
     X_train = np.array([graph.nodes[i]['fp'] for i in graph.nodes])
     y_train = np.array([int(graph.nodes[i]['categorical_label']) for i in graph.nodes])
@@ -62,7 +65,7 @@ def preprocess_data(df):
     test_df = df[df["split"] == "test"]
     test_smiles_list = test_df["canonical_smiles"].values
     test_classes = test_df["active"].values
-    test_network = MolecularNetwork(descriptor="morgan2", sim_metric="tanimoto", sim_threshold=0.5)
+    test_network = MolecularNetwork(descriptor="morgan2", sim_metric="tanimoto", sim_threshold=0.7)
     test_graph = test_network.create_graph(test_smiles_list, test_classes)
     X_test = np.array([test_graph.nodes[i]['fp'] for i in test_graph.nodes])
     y_test = np.array([int(test_graph.nodes[i]['categorical_label']) for i in test_graph.nodes])
