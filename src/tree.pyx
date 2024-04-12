@@ -1,6 +1,5 @@
 #cython: language_level=3, boundscheck=False, wraparound=False, nonecheck=False, initializedcheck=False, cdivision=True
 from typing import Any, Optional, Union
-
 import numpy as np
 
 cimport numpy as np
