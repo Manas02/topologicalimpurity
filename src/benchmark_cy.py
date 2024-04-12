@@ -9,7 +9,7 @@ from molecularnetwork import MolecularNetwork
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import accuracy_score, balanced_accuracy_score, f1_score, precision_score, recall_score, roc_auc_score
 
-from tdt import TopologicalDecisionTreeClassifier
+from tree import TopologicalDecisionTreeClassifier
 
 logger.remove()  # Remove any previous configurations
 logger.add(sys.stdout, level="WARNING")  # Add stdout with INFO level
@@ -59,7 +59,7 @@ def preprocess_data(df):
     graph = network.create_graph(train_smiles_list, train_classes)
     X_train = np.array([graph.nodes[i]['fp'] for i in graph.nodes])
     y_train = np.array([int(graph.nodes[i]['categorical_label']) for i in graph.nodes])
-    A_train = nx.adjacency_matrix(graph, weight=None)
+    A_train = nx.adjacency_matrix(graph, weight=None).toarray()
 
     # test
     test_df = df[df["split"] == "test"]
