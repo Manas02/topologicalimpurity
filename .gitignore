@@ -1,8 +1,6 @@
 .pytest_cache/
 .vscode/
 
-# Data
-data/
 
 # Mac General
 .DS_Store
