@@ -1,5 +1,6 @@
 import os
 import sys
+
 import numpy as np
 import pandas as pd
 import networkx as nx
@@ -11,16 +12,16 @@ from sklearn.metrics import accuracy_score, balanced_accuracy_score, f1_score, p
 
 from tree import TopologicalDecisionTreeClassifier
 
+
 logger.remove()  # Remove any previous configurations
 logger.add(sys.stdout, level="WARNING")  # Add stdout with INFO level
+
 
 # Define a function to evaluate the models and store metrics
 def evaluate_models(dataset_name, X_train, y_train, A_train, X_test, y_test):
     # Train TopologicalDecisionTreeClassifier
     topo_clf = TopologicalDecisionTreeClassifier(max_depth=10)
-    logger.debug(f'Training {dataset_name} TopologicalDecisionTreeClassifier model')
     topo_clf.fit(X_train, y_train, A_train)
-    logger.debug(f'Training Completed {dataset_name} TopologicalDecisionTreeClassifier model')
 
     # Train DecisionTreeClassifier
     clf = DecisionTreeClassifier()
