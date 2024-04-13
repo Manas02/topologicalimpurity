@@ -10,7 +10,7 @@ from molecularnetwork import MolecularNetwork
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import accuracy_score, balanced_accuracy_score, f1_score, precision_score, recall_score, roc_auc_score
 
-from tree import TopologicalDecisionTreeClassifier
+from topotree import TopologicalDecisionTreeClassifier
 
 
 logger.remove()  # Remove any previous configurations
@@ -22,7 +22,7 @@ def evaluate_models(dataset_name, sim_threshold, molnet_fp,
                     model_fp, X_train, y_train, 
                     A_train, X_test, y_test):
     
-    topo_clf = TopologicalDecisionTreeClassifier(max_depth=10)
+    topo_clf = TopologicalDecisionTreeClassifier(max_depth=50)
     topo_clf.fit(X_train, y_train, A_train)
 
     # Train DecisionTreeClassifier

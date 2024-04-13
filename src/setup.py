@@ -5,14 +5,14 @@ import numpy
 
 ext_modules = [
     Extension(
-        'tree',
+        'topotree',
         sources=['tree.pyx'],
         include_dirs=[numpy.get_include()],  # Add NumPy include path here
     ),
 ]
 
 setup(
-    name='tree',
+    name='topotree',
     ext_modules=cythonize(ext_modules,
     compiler_directives={'language_level' : "3"}),
 )

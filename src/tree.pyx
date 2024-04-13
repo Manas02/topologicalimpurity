@@ -1,7 +1,6 @@
 #cython: language_level=3, boundscheck=False, wraparound=False, nonecheck=False, initializedcheck=False, cdivision=True
 from typing import Any, Optional, Union
 import numpy as np
-
 cimport numpy as np
 
 
@@ -10,6 +9,7 @@ cdef class TopologicalDecisionTreeClassifier:
     cdef int min_samples_split
     cdef int min_samples_leaf
     cdef float min_impurity_reduction
+    cdef float mol_net_threshold
     cdef dict[str, Any] tree_
     cdef np.ndarray classes_
     cdef int n_classes_
@@ -17,37 +17,43 @@ cdef class TopologicalDecisionTreeClassifier:
     def __init__(self, max_depth: int = -1, 
                  min_samples_split: int = 2,
                  min_samples_leaf: int = 1, 
-                 min_impurity_reduction: float = 0):
+                 min_impurity_reduction: float = 0,
+                 mol_net_threshold:float = 0.):
         
         self.max_depth = max_depth
         self.min_samples_split = min_samples_split
         self.min_samples_leaf = min_samples_leaf
         self.min_impurity_reduction = min_impurity_reduction
+        self.mol_net_threshold = mol_net_threshold
         self.tree_ = None
 
     cpdef fit(self, np.ndarray X, np.ndarray y, np.ndarray  adj_matrix):
         self.classes_ = np.unique(y)
         self.n_classes_ = len(self.classes_)
+        adj_matrix = (adj_matrix > self.mol_net_threshold).astype(int)
         assert self.n_classes_ >= 2, f"At least 2 classes should be present in categorical label (y), only {self.n_classes_} found"
         self.tree_ = self._build_tree(X, y, adj_matrix, depth=0)
-        return self
+        return self.tree_
     
     cdef dict[str, Any] _build_tree(self, np.ndarray X, np.ndarray y, np.ndarray  adj_matrix, int depth):
         best_split_feature: Union[int, None] = None 
         best_split_value: Union[float, None] = None
         topo_impurity = self._topological_impurity(y, adj_matrix)
+        p_act = (y == 1).sum()/len(y)
 
         if (depth == self.max_depth or 
             len(np.unique(y)) == 1 or 
             len(y) <= self.min_samples_split):
             leaf_node = self._create_leaf_node(y)
-            leaf_node["impurity"] = topo_impurity
+            leaf_node['topological_impurity'] = topo_impurity
+            leaf_node['P_active'] = p_act
             return leaf_node
 
         best_split_feature, best_split_value = self._find_best_split(X, y, adj_matrix)
         if best_split_feature is None:
             leaf_node = self._create_leaf_node(y)
-            leaf_node["impurity"] = topo_impurity
+            leaf_node['topological_impurity'] = topo_impurity
+            leaf_node['P_active'] = p_act
             return leaf_node
 
         left_indices = X[:, best_split_feature] <= best_split_value
@@ -56,11 +62,12 @@ cdef class TopologicalDecisionTreeClassifier:
         left_tree = self._build_tree(X[left_indices], y[left_indices], adj_matrix[left_indices][:, left_indices], depth + 1)
         right_tree = self._build_tree(X[right_indices], y[right_indices], adj_matrix[right_indices][:, right_indices], depth + 1)
 
-        return {"split_feature": best_split_feature, 
-                "split_value": best_split_value, 
-                "left": left_tree, 
-                "right": right_tree,
-                "topological impurity": topo_impurity}
+        return {'split_feature': best_split_feature, 
+                'split_value': best_split_value, 
+                'left': left_tree, 
+                'right': right_tree,
+                'topological_impurity': topo_impurity,
+                'P_active': p_act}
     
 
     cdef dict[str, Any] _create_leaf_node(self, np.ndarray y):
@@ -115,6 +122,7 @@ cdef class TopologicalDecisionTreeClassifier:
 
                 if (impurity_reduction > best_impurity_reduction and 
                     impurity_reduction > self.min_impurity_reduction):
+                
                     best_impurity_reduction = impurity_reduction
                     best_split_feature = feature
                     best_split_value = split_value

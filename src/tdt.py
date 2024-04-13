@@ -32,12 +32,17 @@ class TopologicalDecisionTreeClassifier:
         best_split_feature: Union[int,None] = None 
         best_split_value:Union[float,None] = None
         topo_impurity = self._topological_impurity(y, adj_matrix)
+        p_act = (y == 1).sum()/len(y)
+        if topo_impurity > 0.5:
+            logger.critical('WTFF')
+            print(f"{y=}|{adj_matrix.sum()/2}")
 
         if (depth == self.max_depth or 
             len(np.unique(y)) == 1 or 
             len(y) <= self.min_samples_split):
             leaf_node = self._create_leaf_node(y)
-            leaf_node['impurity'] = topo_impurity
+            leaf_node['topological_impurity'] = topo_impurity
+            leaf_node['P_active'] = p_act
             logger.debug(f"Creating Leaf Node with y ({y.shape})")
             return leaf_node
 
@@ -46,7 +51,8 @@ class TopologicalDecisionTreeClassifier:
             logger.warning(f"{best_split_feature = } for {y.shape = } & {adj_matrix.shape = }")
             leaf_node = self._create_leaf_node(y)
             # Save impurity in leaf node
-            leaf_node['impurity'] = topo_impurity
+            leaf_node['topological_impurity'] = topo_impurity
+            leaf_node['P_active'] = p_act
             return leaf_node
 
         left_indices = X[:, best_split_feature] <= best_split_value
@@ -62,7 +68,8 @@ class TopologicalDecisionTreeClassifier:
                 'split_value': best_split_value, 
                 'left': left_tree, 
                 'right': right_tree,
-                'topological impurity': topo_impurity}
+                'topological_impurity': topo_impurity,
+                'P_active': p_act}
     
 
     def _create_leaf_node(self, y: np.ndarray) -> dict[str, Any]:
@@ -72,14 +79,14 @@ class TopologicalDecisionTreeClassifier:
         return {'leaf': True, 'class': majority_class}
 
 
-    def _topological_impurity(self, y: np.ndarray, adj_matrix: csr_matrix) -> np.float64:
+    def _topological_impurity(self, y: np.ndarray, adj_matrix: np.ndarray) -> np.float64:
         """Calculate Topological Impurity"""
         total_samples = len(y)
-        class_counts = np.bincount(y)
+        class_counts = np.bincount(y, minlength=self.n_classes_)
         logger.debug(f"Topological Impurity = ∑ P(class_i) * (1 + |E_class_ij|/|E|)")
 
         # Count edges between different classes using vectorized operation 
-        edges_between_classes = np.sum(adj_matrix.multiply(y[:, None] != y[None, :]).data) / 2
+        edges_between_classes = np.sum(adj_matrix * (y[:, None] != y[None, :])) / 2
 
         # Compute the product of class proportions
         class_proportions_product = np.prod(class_counts / total_samples)
