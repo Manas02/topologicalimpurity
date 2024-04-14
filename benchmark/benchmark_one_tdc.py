@@ -8,6 +8,7 @@ from tqdm import tqdm
 from loguru import logger
 from molecularnetwork import MolecularNetwork
 from sklearn.tree import DecisionTreeClassifier
+from joblib import dump
 from sklearn.metrics import accuracy_score, balanced_accuracy_score, f1_score, precision_score, recall_score, roc_auc_score
 from rdkit import RDLogger           
 RDLogger.DisableLog('rdApp.*')                             
@@ -24,7 +25,8 @@ def evaluate_models(dataset_name, sim_threshold, molnet_fp,
                     A_train, X_test, y_test):
     
     topo_clf = TopologicalDecisionTreeClassifier(max_depth=15, mol_net_threshold=sim_threshold)
-    topo_clf.fit(X_train, y_train, A_train)
+    clf_tree = topo_clf.fit(X_train, y_train, A_train)
+    dump(clf_tree, 'dili.joblib')
 
     # Train DecisionTreeClassifier
     clf = DecisionTreeClassifier(random_state=69420)
