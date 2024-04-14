@@ -58,7 +58,7 @@ def evaluate_models(dataset_name, sim_threshold, molnet_fp,
     return metrics
 
 # Path to the folder containing datasets
-data_folder = '../tdc_data/admet_group'
+data_folder = '../data/tdc_data/admet_group'
 
 # Initialize an empty list to store metrics for all datasets
 all_metrics = []

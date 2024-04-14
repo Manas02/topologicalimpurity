@@ -82,7 +82,7 @@ def preprocess_data(df, sim_threshold, molnet_fp, model_fp):
 
 
 # Path to the folder containing datasets
-data_folder = '../data/'
+data_folder = '../data/simpd'
 
 # Initialize an empty list to store metrics for all datasets
 all_metrics = []
