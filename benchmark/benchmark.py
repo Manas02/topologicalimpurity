@@ -22,7 +22,7 @@ def evaluate_models(dataset_name, sim_threshold, molnet_fp,
                     model_fp, X_train, y_train, 
                     A_train, X_test, y_test):
     
-    topo_clf = TopologicalDecisionTreeClassifier(max_depth=25, min_samples_leaf=3)
+    topo_clf = TopologicalDecisionTreeClassifier()
     topo_clf.fit(X_train, y_train, A_train)
 
     # Train DecisionTreeClassifier

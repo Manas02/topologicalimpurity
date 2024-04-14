@@ -26,7 +26,7 @@ def evaluate_models(dataset_name, sim_threshold, molnet_fp,
     
     X_train = X_train.astype(np.float64)
 
-    topo_clf = TopologicalRandomForest(max_depth=25, n_trees=100, random_state=69420)
+    topo_clf = TopologicalRandomForest(max_depth=15, n_trees=100, random_state=69420)
     topo_tree = topo_clf.fit(X_train, y_train, A_train)
     dump(topo_tree, "clf.joblib")
 
