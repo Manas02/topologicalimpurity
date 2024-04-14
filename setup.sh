@@ -6,10 +6,9 @@ cd topologicalimpurity/
 
 # install packages
 poetry install 
-poetry shell
 # Install the Python package
 cd topotree/
-python setup.py build_ext --inplace
+poetry run python setup.py build_ext --inplace
 cd ../benchmark
 
 while true; do
@@ -30,8 +29,8 @@ done
 # Perform action based on user's response
 if [[ "$response" == "yes" ]]; then
     echo "Starting benchmarks [This will take a very long time]..."
-    python benchmark.py 
-    python benchmark_rf.py 
+    poetry run python benchmark.py 
+    poetry run python benchmark_rf.py 
 else
     echo "Install Done. Head over to `benchmark/`."
 fi

@@ -10,5 +10,5 @@ pipx install poetry
 
 # Paste this on your terminal to get started
 ```sh
-curl -sL <URL_TO_SETUP_SH> -o setup.sh && bash setup.sh && rm setup.sh
+
 ```
