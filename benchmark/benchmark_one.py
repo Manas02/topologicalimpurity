@@ -9,12 +9,14 @@ from loguru import logger
 from molecularnetwork import MolecularNetwork
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import accuracy_score, balanced_accuracy_score, f1_score, precision_score, recall_score, roc_auc_score
+from joblib import dump
 
 from topotree import TopologicalDecisionTreeClassifier
 
 
+
 logger.remove()  # Remove any previous configurations
-logger.add(sys.stdout, level="INFO")  # Add stdout with INFO level
+logger.add(sys.stdout, level="CRITICAL")  # Add stdout with INFO level
 
 
 # Define a function to evaluate the models and store metrics
@@ -22,8 +24,9 @@ def evaluate_models(dataset_name, sim_threshold, molnet_fp,
                     model_fp, X_train, y_train, 
                     A_train, X_test, y_test):
     
-    topo_clf = TopologicalDecisionTreeClassifier(max_depth=50)
-    topo_clf.fit(X_train, y_train, A_train)
+    topo_clf = TopologicalDecisionTreeClassifier(max_depth=10)
+    topo_tree = topo_clf.fit(X_train, y_train, A_train)
+    dump(topo_tree, "clf.joblib")
 
     # Train DecisionTreeClassifier
     clf = DecisionTreeClassifier()
@@ -32,8 +35,6 @@ def evaluate_models(dataset_name, sim_threshold, molnet_fp,
     # Make predictions
     topo_pred = topo_clf.predict(X_test)
     pred = clf.predict(X_test)
-
-
 
     # Calculate evaluation metrics
     metrics = {
@@ -65,7 +66,6 @@ def preprocess_data(df, sim_threshold, molnet_fp, model_fp):
     network = MolecularNetwork(descriptor=molnet_fp, sim_metric="tanimoto", sim_threshold=sim_threshold, node_descriptor=model_fp)
     graph = network.create_graph(train_smiles_list, train_classes)
     X_train = np.array([graph.nodes[i]['fp'] for i in graph.nodes])
-    logger.critical(X_train.shape)
     y_train = np.array([int(graph.nodes[i]['categorical_label']) for i in graph.nodes])
     A_train = nx.adjacency_matrix(graph, weight=None).toarray()
 
@@ -88,30 +88,28 @@ data_folder = '../data/'
 all_metrics = []
 
 # Iterate over each dataset file in the data folder
-for file_name in tqdm(os.listdir(data_folder)[3:], leave=False, desc="Dataset"):
-    if file_name.endswith('.csv'):
-        # Load dataset
-        df = pd.read_csv(os.path.join(data_folder, file_name))
-        # Extract features and labels
-        for sim_threshold in tqdm([0.5, 0.7, 0.9, 0.95], leave=False, desc="Similarity Threshold"):
-            # for model_fp in tqdm(["rdkit", "maccs",  "morgan2", "morgan3"], leave=False, desc="Model Fingerprint"):
-            #     for molnet_fp in tqdm(["rdkit", "maccs", "morgan2", "morgan3"], leave=False, desc="Molecularnet Fingerprint"):
-            for model_fp in tqdm(["maccs",  "morgan2"], leave=False, desc="Model Fingerprint"):
-                for molnet_fp in tqdm(["maccs", "morgan2"], leave=False, desc="Molecularnet Fingerprint"):
-                    logger.info(f'{file_name[:-4]}|{model_fp=}|{molnet_fp=}|{sim_threshold=}')
-                    (X_train, y_train, A_train, X_test, y_test) = preprocess_data(df, sim_threshold, molnet_fp, model_fp)
 
-                    # Evaluate models and store metrics
-                    dataset_name = os.path.splitext(file_name)[0]
+if __name__ == "__main__":
+    # Load dataset
+    file_name = "CHEMBL3705647.csv"
+    df = pd.read_csv(os.path.join(data_folder, file_name))
+    # Extract features and labels
+    sim_threshold = 0.7
+    molnet_fp, model_fp = "morgan3", "morgan2"
+    (X_train, y_train, A_train, X_test, y_test) = preprocess_data(df, sim_threshold, molnet_fp, model_fp)
+    logger.info(f'{file_name[:-4]}|{model_fp=}|{molnet_fp=}|{sim_threshold=}')
 
-                    # Evaluate models    
-                    metrics = evaluate_models(dataset_name, sim_threshold, molnet_fp, model_fp, X_train, y_train, A_train, X_test, y_test)
+    # Evaluate models and store metrics
+    dataset_name = os.path.splitext(file_name)[0]
 
-                    # Append metrics to the list
-                    all_metrics.append(metrics)
+    # Evaluate models    
+    metrics = evaluate_models(dataset_name, sim_threshold, "morgan3", "morgan3", X_train, y_train, A_train, X_test, y_test)
 
-                    # Convert the list of dictionaries to a DataFrame
-                    metrics_df = pd.DataFrame(all_metrics)
+    # Append metrics to the list
+    all_metrics.append(metrics)
 
-                    # Save the metrics to a CSV file
-                    metrics_df.to_csv('metrics_results.csv', index=False)
+    # Convert the list of dictionaries to a DataFrame
+    metrics_df = pd.DataFrame(all_metrics)
+
+    # Save the metrics to a CSV file
+    metrics_df.to_csv('results_tree_one.csv', index=False)

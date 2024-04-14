@@ -9,9 +9,8 @@ from loguru import logger
 from molecularnetwork import MolecularNetwork
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, balanced_accuracy_score, f1_score, precision_score, recall_score, roc_auc_score
-from joblib import dump
 
-from ensamble import TopologicalRandomForest
+from topotree import TopologicalRandomForest
 
 
 
@@ -20,15 +19,14 @@ logger.add(sys.stdout, level="CRITICAL")  # Add stdout with INFO level
 
 
 # Define a function to evaluate the models and store metrics
-def evaluate_models(dataset_name, sim_threshold, molnet_fp, 
+def evaluate_models(dataset_name, run, molnet_fp, 
                     model_fp, X_train, y_train, 
                     A_train, X_test, y_test):
     
     X_train = X_train.astype(np.float64)
 
-    topo_clf = TopologicalRandomForest(max_depth=25, n_trees=100, random_state=69420)
+    topo_clf = TopologicalRandomForest(max_depth=25, n_trees=100, random_state=69420*run)
     topo_tree = topo_clf.fit(X_train, y_train, A_train)
-    dump(topo_tree, "clf.joblib")
 
     # Train DecisionTreeClassifier
     clf = RandomForestClassifier()
@@ -41,7 +39,7 @@ def evaluate_models(dataset_name, sim_threshold, molnet_fp,
     # Calculate evaluation metrics
     metrics = {
         "Dataset": dataset_name,
-        "Sim_threshold": sim_threshold,
+        "Run": run,
         "Molecular_network_Fingeprint": molnet_fp,
         "Model_Fingeprint": model_fp,
         "Topological_Random_Forest_Accuracy": accuracy_score(y_test, topo_pred),
@@ -92,26 +90,32 @@ all_metrics = []
 # Iterate over each dataset file in the data folder
 
 if __name__ == "__main__":
-    # Load dataset
-    file_name = "CHEMBL3705647.csv"
-    df = pd.read_csv(os.path.join(data_folder, file_name))
-    # Extract features and labels
-    molnet_fp, model_fp = "morgan3", "morgan2"
-    sim_threshold = 0.4
-    (X_train, y_train, A_train, X_test, y_test) = preprocess_data(df, sim_threshold, molnet_fp, model_fp)
-    logger.info(f'{file_name[:-4]}|{model_fp=}|{molnet_fp=}|{sim_threshold=}')
+    # Iterate over each dataset file in the data folder
+    sim_threshold = 0.4 # Don't change this
+    molnet_fp = "morgan2" # Maybe try morgan3, maccs
 
-    # Evaluate models and store metrics
-    dataset_name = os.path.splitext(file_name)[0]
+    for file_name in tqdm(os.listdir(data_folder)[3:], leave=False, desc="Dataset"):
+        if file_name.endswith('.csv'):
+            # Load dataset
+            df = pd.read_csv(os.path.join(data_folder, file_name))
+            # Extract features and labels
+            for model_fp in ["maccs",  "morgan2"]:
+                logger.info(f'{file_name[:-4]}|{model_fp=}|{molnet_fp=}')
 
-    # Evaluate models    
-    metrics = evaluate_models(dataset_name, sim_threshold, "morgan3", "morgan3", X_train, y_train, A_train, X_test, y_test)
+                (X_train, y_train, A_train, X_test, y_test) = preprocess_data(df, sim_threshold, molnet_fp, model_fp)
 
-    # Append metrics to the list
-    all_metrics.append(metrics)
+                # Evaluate models and store metrics
+                dataset_name = os.path.splitext(file_name)[0]
 
-    # Convert the list of dictionaries to a DataFrame
-    metrics_df = pd.DataFrame(all_metrics)
+                for run in range(3):
+                    # Evaluate models
+                    metrics = evaluate_models(dataset_name, run, molnet_fp, model_fp, X_train, y_train, A_train, X_test, y_test)
 
-    # Save the metrics to a CSV file
-    metrics_df.to_csv('metrics_results.csv', index=False)
+                    # Append metrics to the list
+                    all_metrics.append(metrics)
+
+                    # Convert the list of dictionaries to a DataFrame
+                    metrics_df = pd.DataFrame(all_metrics)
+
+                    # Save the metrics to a CSV file
+                    metrics_df.to_csv('results_rf.csv', index=False)

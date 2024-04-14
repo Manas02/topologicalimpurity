@@ -1,37 +1,14 @@
 # Topological Impurity measure for Decision Trees and Random Forests for QSAR
 
-Packaging and versioning -- let Poetry do the work.
+![](dt.png)
 
-Install poetry -
+## Install poetry
 ```sh
 pipx install poetry
 ```
 
-Create venv and install packages using poetry
-```
-cd topoinfogain/
-poetry install
-```
 
-1. Build .so file from cython
+# Paste this on your terminal to get started
 ```sh
-cd src
-python setup.py build_ext --inplace
+curl -sL <URL_TO_SETUP_SH> -o setup.sh && bash setup.sh && rm setup.sh
 ```
-
-2. Run benchmark
-```sh
-python benchmark.py
-```
-
-results are stored in `metrics_results.csv`.
-
-3. Test on one dataset
-
-```sh
-python benchmark_one.py
-```
-
-- `tdt.py` -- pure python implementation
-- `tree.py` -- cython implmentation
-

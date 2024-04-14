@@ -1,10 +1,9 @@
 [tool.poetry]
-name = "topoinfogain"
+name = "topotree"
 version = "0.1.0"
-description = ""
-authors = ["Manas Mahale <manas.mahale2002@gmail.com>"]
+description = "Topological Impurity measure for Decision Trees and Random Forests for QSAR"
+authors = ["Manas Mahale <manas.mahale@bcp.edu.in>"]
 readme = "README.md"
-
 
 [tool.poetry.dependencies]
 python = "^3.12"
@@ -25,7 +24,7 @@ graphviz = "^0.20.3"
 numba = "^0.59.1"
 cython = "^3.0.10"
 pqdm = "^0.2.0"
-
+setuptools = "^69.5.1"
 
 [build-system]
 requires = ["poetry-core"]

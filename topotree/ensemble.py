@@ -5,7 +5,7 @@ from topotree import TopologicalDecisionTreeClassifier
 
 
 class TopologicalRandomForest:
-    def __init__(self, n_trees=100, max_depth=None, max_features=None,random_state=69420):
+    def __init__(self, n_trees=100, max_depth=None, max_features=None,random_state=None):
         """
         Initialize the Random Forest.
 

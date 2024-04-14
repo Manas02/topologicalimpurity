@@ -10,7 +10,7 @@ cdef class TopologicalDecisionTreeClassifier:
     cdef int min_samples_leaf
     cdef float min_impurity_reduction
     cdef float mol_net_threshold
-    cdef dict[str, Any] tree_
+    cdef dict tree_
     cdef np.ndarray classes_
     cdef int n_classes_
 
@@ -35,7 +35,7 @@ cdef class TopologicalDecisionTreeClassifier:
         self.tree_ = self._build_tree(X, y, adj_matrix, depth=0)
         return self.tree_
     
-    cdef dict[str, Any] _build_tree(self, np.ndarray X, np.ndarray y, np.ndarray  adj_matrix, int depth):
+    cdef dict _build_tree(self, np.ndarray X, np.ndarray y, np.ndarray  adj_matrix, int depth):
         best_split_feature: Union[int, None] = None 
         best_split_value: Union[float, None] = None
         topo_impurity = self._topological_impurity(y, adj_matrix)
@@ -70,7 +70,7 @@ cdef class TopologicalDecisionTreeClassifier:
                 'P_active': p_act}
     
 
-    cdef dict[str, Any] _create_leaf_node(self, np.ndarray y):
+    cdef dict _create_leaf_node(self, np.ndarray y):
         assert y.shape[0] > 0, "y is empty, how to create a leaf node with no data?"
         unique_classes, counts = np.unique(y, return_counts=True)
         majority_class = unique_classes[np.argmax(counts)]
@@ -135,7 +135,7 @@ cdef class TopologicalDecisionTreeClassifier:
             predictions[i] = self._predict_sample(sample, self.tree_)
         return predictions
 
-    cdef int _predict_sample(self, np.ndarray sample, dict[str, Any] node):
+    cdef int _predict_sample(self, np.ndarray sample, dict node):
         if node is None:
             raise ValueError("Expected a non-None dictionary node")
         
