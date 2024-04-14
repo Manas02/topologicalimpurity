@@ -24,7 +24,7 @@ def evaluate_models(dataset_name, sim_threshold, molnet_fp,
                     model_fp, X_train, y_train, 
                     A_train, X_test, y_test):
     
-    topo_clf = TopologicalDecisionTreeClassifier(max_depth=10)
+    topo_clf = TopologicalDecisionTreeClassifier(max_depth=10, mol_net_threshold=sim_threshold)
     topo_tree = topo_clf.fit(X_train, y_train, A_train)
     dump(topo_tree, "clf.joblib")
 
@@ -67,7 +67,7 @@ def preprocess_data(df, sim_threshold, molnet_fp, model_fp):
     graph = network.create_graph(train_smiles_list, train_classes)
     X_train = np.array([graph.nodes[i]['fp'] for i in graph.nodes])
     y_train = np.array([int(graph.nodes[i]['categorical_label']) for i in graph.nodes])
-    A_train = nx.adjacency_matrix(graph, weight=None).toarray()
+    A_train = nx.adjacency_matrix(graph, weight='similarity').toarray()
 
     # test
     test_df = df[df["split"] == "test"]

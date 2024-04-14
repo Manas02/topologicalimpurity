@@ -18,7 +18,7 @@ cdef class TopologicalDecisionTreeClassifier:
                  min_samples_split: int = 2,
                  min_samples_leaf: int = 1, 
                  min_impurity_reduction: float = 0,
-                 mol_net_threshold:float = 0.):
+                 mol_net_threshold:float = 0.0):
         
         self.max_depth = max_depth
         self.min_samples_split = min_samples_split

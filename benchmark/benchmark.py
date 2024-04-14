@@ -22,7 +22,7 @@ def evaluate_models(dataset_name, sim_threshold, molnet_fp,
                     model_fp, X_train, y_train, 
                     A_train, X_test, y_test):
     
-    topo_clf = TopologicalDecisionTreeClassifier()
+    topo_clf = TopologicalDecisionTreeClassifier(mol_net_threshold=sim_threshold)
     topo_clf.fit(X_train, y_train, A_train)
 
     # Train DecisionTreeClassifier
@@ -67,7 +67,7 @@ def preprocess_data(df, sim_threshold, molnet_fp, model_fp):
     X_train = np.array([graph.nodes[i]['fp'] for i in graph.nodes])
     logger.critical(X_train.shape)
     y_train = np.array([int(graph.nodes[i]['categorical_label']) for i in graph.nodes])
-    A_train = nx.adjacency_matrix(graph, weight=None).toarray()
+    A_train = nx.adjacency_matrix(graph, weight='similarity').toarray()
 
     # test
     test_df = df[df["split"] == "test"]
@@ -93,11 +93,11 @@ for file_name in tqdm(os.listdir(data_folder)[3:], leave=False, desc="Dataset"):
         # Load dataset
         df = pd.read_csv(os.path.join(data_folder, file_name))
         # Extract features and labels
-        for sim_threshold in tqdm([0.5, 0.7, 0.9, 0.95], leave=False, desc="Similarity Threshold"):
-            for model_fp in tqdm(["maccs",  "morgan2"], leave=False, desc="Model Fingerprint"):
-                for molnet_fp in tqdm(["maccs", "morgan2"], leave=False, desc="Molecularnet Fingerprint"):
+        for model_fp in tqdm(["maccs",  "morgan2"], leave=False, desc="Model Fingerprint"):
+            for molnet_fp in tqdm(["maccs", "morgan2"], leave=False, desc="Molecularnet Fingerprint"):
+                (X_train, y_train, A_train, X_test, y_test) = preprocess_data(df, 0.4, molnet_fp, model_fp)
+                for sim_threshold in tqdm([0.5, 0.7, 0.9, 0.95], leave=False, desc="Similarity Threshold"):
                     logger.info(f'{file_name[:-4]}|{model_fp=}|{molnet_fp=}|{sim_threshold=}')
-                    (X_train, y_train, A_train, X_test, y_test) = preprocess_data(df, sim_threshold, molnet_fp, model_fp)
 
                     # Evaluate models and store metrics
                     dataset_name = os.path.splitext(file_name)[0]

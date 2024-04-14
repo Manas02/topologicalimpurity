@@ -2159,6 +2159,21 @@ static CYTHON_INLINE PyObject *__Pyx__GetModuleGlobalName(PyObject *name);
 /* ExtTypeTest.proto */
 static CYTHON_INLINE int __Pyx_TypeTest(PyObject *obj, PyTypeObject *type);
 
+/* PyObjectFormatAndDecref.proto */
+static CYTHON_INLINE PyObject* __Pyx_PyObject_FormatSimpleAndDecref(PyObject* s, PyObject* f);
+static CYTHON_INLINE PyObject* __Pyx_PyObject_FormatAndDecref(PyObject* s, PyObject* f);
+
+/* PyObjectCallOneArg.proto */
+static CYTHON_INLINE PyObject* __Pyx_PyObject_CallOneArg(PyObject *func, PyObject *arg);
+
+/* PyIntBinop.proto */
+#if !CYTHON_COMPILING_IN_PYPY
+static PyObject* __Pyx_PyInt_TrueDivideObjC(PyObject *op1, PyObject *op2, long intval, int inplace, int zerodivision_check);
+#else
+#define __Pyx_PyInt_TrueDivideObjC(op1, op2, intval, inplace, zerodivision_check)\
+    (inplace ? PyNumber_InPlaceTrueDivide(op1, op2) : PyNumber_TrueDivide(op1, op2))
+#endif
+
 /* AssertionsEnabled.proto */
 #if CYTHON_COMPILING_IN_PYPY && PY_VERSION_HEX < 0x02070600 && !defined(Py_OptimizeFlag)
   #define __Pyx_init_assertions_enabled()  (0)
@@ -2240,22 +2255,11 @@ static PyObject *__Pyx_GetItemInt_Generic(PyObject *o, PyObject* j);
 static CYTHON_INLINE PyObject *__Pyx_GetItemInt_Fast(PyObject *o, Py_ssize_t i,
                                                      int is_list, int wraparound, int boundscheck);
 
-/* PyObjectCallOneArg.proto */
-static CYTHON_INLINE PyObject* __Pyx_PyObject_CallOneArg(PyObject *func, PyObject *arg);
-
 /* ObjectGetItem.proto */
 #if CYTHON_USE_TYPE_SLOTS
 static CYTHON_INLINE PyObject *__Pyx_PyObject_GetItem(PyObject *obj, PyObject *key);
 #else
 #define __Pyx_PyObject_GetItem(obj, key)  PyObject_GetItem(obj, key)
-#endif
-
-/* PyIntBinop.proto */
-#if !CYTHON_COMPILING_IN_PYPY
-static PyObject* __Pyx_PyInt_TrueDivideObjC(PyObject *op1, PyObject *op2, long intval, int inplace, int zerodivision_check);
-#else
-#define __Pyx_PyInt_TrueDivideObjC(op1, op2, intval, inplace, zerodivision_check)\
-    (inplace ? PyNumber_InPlaceTrueDivide(op1, op2) : PyNumber_TrueDivide(op1, op2))
 #endif
 
 /* PyIntCompare.proto */
@@ -2951,6 +2955,7 @@ int __pyx_module_is_main_tree = 0;
 
 /* Implementation of "tree" */
 /* #### Code section: global_var ### */
+static PyObject *__pyx_builtin_print;
 static PyObject *__pyx_builtin_AssertionError;
 static PyObject *__pyx_builtin_range;
 static PyObject *__pyx_builtin_enumerate;
@@ -2981,16 +2986,19 @@ static const char __pyx_k_spec[] = "__spec__";
 static const char __pyx_k_test[] = "__test__";
 static const char __pyx_k_tree[] = "tree";
 static const char __pyx_k_Union[] = "Union";
+static const char __pyx_k_after[] = "after";
 static const char __pyx_k_class[] = "class";
 static const char __pyx_k_dtype[] = "dtype";
 static const char __pyx_k_found[] = " found";
 static const char __pyx_k_numpy[] = "numpy";
+static const char __pyx_k_print[] = "print";
 static const char __pyx_k_range[] = "range";
 static const char __pyx_k_right[] = "right";
 static const char __pyx_k_state[] = "state";
 static const char __pyx_k_zeros[] = "zeros";
 static const char __pyx_k_argmax[] = "argmax";
 static const char __pyx_k_astype[] = "astype";
+static const char __pyx_k_before[] = "before";
 static const char __pyx_k_dict_2[] = "_dict";
 static const char __pyx_k_enable[] = "enable";
 static const char __pyx_k_import[] = "__import__";
@@ -3041,6 +3049,7 @@ static const char __pyx_k_asyncio_coroutines[] = "asyncio.coroutines";
 static const char __pyx_k_cline_in_traceback[] = "cline_in_traceback";
 static const char __pyx_k_topological_impurity[] = "topological_impurity";
 static const char __pyx_k_min_impurity_reduction[] = "min_impurity_reduction";
+static const char __pyx_k_self_mol_net_threshold[] = "self.mol_net_threshold=";
 static const char __pyx_k_topological_impurity_2[] = "_topological_impurity";
 static const char __pyx_k_pyx_unpickle_TopologicalDecisi[] = "__pyx_unpickle_TopologicalDecisionTreeClassifier";
 static const char __pyx_k_numpy_core_multiarray_failed_to[] = "numpy.core.multiarray failed to import";
@@ -3155,9 +3164,11 @@ typedef struct {
   PyObject *__pyx_n_s__12;
   PyObject *__pyx_n_s__26;
   PyObject *__pyx_n_s_adj_matrix;
+  PyObject *__pyx_n_u_after;
   PyObject *__pyx_n_s_argmax;
   PyObject *__pyx_n_s_astype;
   PyObject *__pyx_n_s_asyncio_coroutines;
+  PyObject *__pyx_n_u_before;
   PyObject *__pyx_n_s_bincount;
   PyObject *__pyx_n_u_class;
   PyObject *__pyx_n_s_class_getitem;
@@ -3196,6 +3207,7 @@ typedef struct {
   PyObject *__pyx_kp_u_numpy_core_umath_failed_to_impor;
   PyObject *__pyx_n_s_pickle;
   PyObject *__pyx_n_s_predict;
+  PyObject *__pyx_n_s_print;
   PyObject *__pyx_n_s_prod;
   PyObject *__pyx_n_s_pyx_PickleError;
   PyObject *__pyx_n_s_pyx_checksum;
@@ -3211,6 +3223,7 @@ typedef struct {
   PyObject *__pyx_n_s_return_counts;
   PyObject *__pyx_n_u_right;
   PyObject *__pyx_n_s_self;
+  PyObject *__pyx_kp_u_self_mol_net_threshold;
   PyObject *__pyx_n_s_setstate;
   PyObject *__pyx_n_s_setstate_cython;
   PyObject *__pyx_n_s_spec;
@@ -3344,9 +3357,11 @@ static int __pyx_m_clear(PyObject *m) {
   Py_CLEAR(clear_module_state->__pyx_n_s__12);
   Py_CLEAR(clear_module_state->__pyx_n_s__26);
   Py_CLEAR(clear_module_state->__pyx_n_s_adj_matrix);
+  Py_CLEAR(clear_module_state->__pyx_n_u_after);
   Py_CLEAR(clear_module_state->__pyx_n_s_argmax);
   Py_CLEAR(clear_module_state->__pyx_n_s_astype);
   Py_CLEAR(clear_module_state->__pyx_n_s_asyncio_coroutines);
+  Py_CLEAR(clear_module_state->__pyx_n_u_before);
   Py_CLEAR(clear_module_state->__pyx_n_s_bincount);
   Py_CLEAR(clear_module_state->__pyx_n_u_class);
   Py_CLEAR(clear_module_state->__pyx_n_s_class_getitem);
@@ -3385,6 +3400,7 @@ static int __pyx_m_clear(PyObject *m) {
   Py_CLEAR(clear_module_state->__pyx_kp_u_numpy_core_umath_failed_to_impor);
   Py_CLEAR(clear_module_state->__pyx_n_s_pickle);
   Py_CLEAR(clear_module_state->__pyx_n_s_predict);
+  Py_CLEAR(clear_module_state->__pyx_n_s_print);
   Py_CLEAR(clear_module_state->__pyx_n_s_prod);
   Py_CLEAR(clear_module_state->__pyx_n_s_pyx_PickleError);
   Py_CLEAR(clear_module_state->__pyx_n_s_pyx_checksum);
@@ -3400,6 +3416,7 @@ static int __pyx_m_clear(PyObject *m) {
   Py_CLEAR(clear_module_state->__pyx_n_s_return_counts);
   Py_CLEAR(clear_module_state->__pyx_n_u_right);
   Py_CLEAR(clear_module_state->__pyx_n_s_self);
+  Py_CLEAR(clear_module_state->__pyx_kp_u_self_mol_net_threshold);
   Py_CLEAR(clear_module_state->__pyx_n_s_setstate);
   Py_CLEAR(clear_module_state->__pyx_n_s_setstate_cython);
   Py_CLEAR(clear_module_state->__pyx_n_s_spec);
@@ -3511,9 +3528,11 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
   Py_VISIT(traverse_module_state->__pyx_n_s__12);
   Py_VISIT(traverse_module_state->__pyx_n_s__26);
   Py_VISIT(traverse_module_state->__pyx_n_s_adj_matrix);
+  Py_VISIT(traverse_module_state->__pyx_n_u_after);
   Py_VISIT(traverse_module_state->__pyx_n_s_argmax);
   Py_VISIT(traverse_module_state->__pyx_n_s_astype);
   Py_VISIT(traverse_module_state->__pyx_n_s_asyncio_coroutines);
+  Py_VISIT(traverse_module_state->__pyx_n_u_before);
   Py_VISIT(traverse_module_state->__pyx_n_s_bincount);
   Py_VISIT(traverse_module_state->__pyx_n_u_class);
   Py_VISIT(traverse_module_state->__pyx_n_s_class_getitem);
@@ -3552,6 +3571,7 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
   Py_VISIT(traverse_module_state->__pyx_kp_u_numpy_core_umath_failed_to_impor);
   Py_VISIT(traverse_module_state->__pyx_n_s_pickle);
   Py_VISIT(traverse_module_state->__pyx_n_s_predict);
+  Py_VISIT(traverse_module_state->__pyx_n_s_print);
   Py_VISIT(traverse_module_state->__pyx_n_s_prod);
   Py_VISIT(traverse_module_state->__pyx_n_s_pyx_PickleError);
   Py_VISIT(traverse_module_state->__pyx_n_s_pyx_checksum);
@@ -3567,6 +3587,7 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
   Py_VISIT(traverse_module_state->__pyx_n_s_return_counts);
   Py_VISIT(traverse_module_state->__pyx_n_u_right);
   Py_VISIT(traverse_module_state->__pyx_n_s_self);
+  Py_VISIT(traverse_module_state->__pyx_kp_u_self_mol_net_threshold);
   Py_VISIT(traverse_module_state->__pyx_n_s_setstate);
   Py_VISIT(traverse_module_state->__pyx_n_s_setstate_cython);
   Py_VISIT(traverse_module_state->__pyx_n_s_spec);
@@ -3706,9 +3727,11 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
 #define __pyx_n_s__12 __pyx_mstate_global->__pyx_n_s__12
 #define __pyx_n_s__26 __pyx_mstate_global->__pyx_n_s__26
 #define __pyx_n_s_adj_matrix __pyx_mstate_global->__pyx_n_s_adj_matrix
+#define __pyx_n_u_after __pyx_mstate_global->__pyx_n_u_after
 #define __pyx_n_s_argmax __pyx_mstate_global->__pyx_n_s_argmax
 #define __pyx_n_s_astype __pyx_mstate_global->__pyx_n_s_astype
 #define __pyx_n_s_asyncio_coroutines __pyx_mstate_global->__pyx_n_s_asyncio_coroutines
+#define __pyx_n_u_before __pyx_mstate_global->__pyx_n_u_before
 #define __pyx_n_s_bincount __pyx_mstate_global->__pyx_n_s_bincount
 #define __pyx_n_u_class __pyx_mstate_global->__pyx_n_u_class
 #define __pyx_n_s_class_getitem __pyx_mstate_global->__pyx_n_s_class_getitem
@@ -3747,6 +3770,7 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
 #define __pyx_kp_u_numpy_core_umath_failed_to_impor __pyx_mstate_global->__pyx_kp_u_numpy_core_umath_failed_to_impor
 #define __pyx_n_s_pickle __pyx_mstate_global->__pyx_n_s_pickle
 #define __pyx_n_s_predict __pyx_mstate_global->__pyx_n_s_predict
+#define __pyx_n_s_print __pyx_mstate_global->__pyx_n_s_print
 #define __pyx_n_s_prod __pyx_mstate_global->__pyx_n_s_prod
 #define __pyx_n_s_pyx_PickleError __pyx_mstate_global->__pyx_n_s_pyx_PickleError
 #define __pyx_n_s_pyx_checksum __pyx_mstate_global->__pyx_n_s_pyx_checksum
@@ -3762,6 +3786,7 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
 #define __pyx_n_s_return_counts __pyx_mstate_global->__pyx_n_s_return_counts
 #define __pyx_n_u_right __pyx_mstate_global->__pyx_n_u_right
 #define __pyx_n_s_self __pyx_mstate_global->__pyx_n_s_self
+#define __pyx_kp_u_self_mol_net_threshold __pyx_mstate_global->__pyx_kp_u_self_mol_net_threshold
 #define __pyx_n_s_setstate __pyx_mstate_global->__pyx_n_s_setstate
 #define __pyx_n_s_setstate_cython __pyx_mstate_global->__pyx_n_s_setstate_cython
 #define __pyx_n_s_spec __pyx_mstate_global->__pyx_n_s_spec
@@ -5196,7 +5221,7 @@ static int __pyx_pw_4tree_33TopologicalDecisionTreeClassifier_1__init__(PyObject
     if (values[4]) {
       __pyx_v_mol_net_threshold = __pyx_PyFloat_AsDouble(values[4]); if (unlikely((__pyx_v_mol_net_threshold == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 21, __pyx_L3_error)
     } else {
-      __pyx_v_mol_net_threshold = ((double)0.);
+      __pyx_v_mol_net_threshold = ((double)0.0);
     }
   }
   goto __pyx_L6_skip;
@@ -5245,7 +5270,7 @@ static int __pyx_pf_4tree_33TopologicalDecisionTreeClassifier___init__(struct __
   __Pyx_RefNannySetupContext("__init__", 1);
 
   /* "tree.pyx":23
- *                  mol_net_threshold:float = 0.):
+ *                  mol_net_threshold:float = 0.0):
  * 
  *         self.max_depth = max_depth             # <<<<<<<<<<<<<<
  *         self.min_samples_split = min_samples_split
@@ -5414,7 +5439,7 @@ static PyObject *__pyx_f_4tree_33TopologicalDecisionTreeClassifier_fit(struct __
  *     cpdef fit(self, np.ndarray X, np.ndarray y, np.ndarray  adj_matrix):
  *         self.classes_ = np.unique(y)             # <<<<<<<<<<<<<<
  *         self.n_classes_ = len(self.classes_)
- *         adj_matrix = (adj_matrix > self.mol_net_threshold).astype(int)
+ *         print(f'{self.mol_net_threshold=}')
  */
   __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 31, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
@@ -5454,8 +5479,8 @@ static PyObject *__pyx_f_4tree_33TopologicalDecisionTreeClassifier_fit(struct __
  *     cpdef fit(self, np.ndarray X, np.ndarray y, np.ndarray  adj_matrix):
  *         self.classes_ = np.unique(y)
  *         self.n_classes_ = len(self.classes_)             # <<<<<<<<<<<<<<
- *         adj_matrix = (adj_matrix > self.mol_net_threshold).astype(int)
- *         assert self.n_classes_ >= 2, f"At least 2 classes should be present in categorical label (y), only {self.n_classes_} found"
+ *         print(f'{self.mol_net_threshold=}')
+ *         print('before', adj_matrix.sum()/2)
  */
   __pyx_t_1 = ((PyObject *)__pyx_v_self->classes_);
   __Pyx_INCREF(__pyx_t_1);
@@ -5466,15 +5491,82 @@ static PyObject *__pyx_f_4tree_33TopologicalDecisionTreeClassifier_fit(struct __
   /* "tree.pyx":33
  *         self.classes_ = np.unique(y)
  *         self.n_classes_ = len(self.classes_)
- *         adj_matrix = (adj_matrix > self.mol_net_threshold).astype(int)             # <<<<<<<<<<<<<<
- *         assert self.n_classes_ >= 2, f"At least 2 classes should be present in categorical label (y), only {self.n_classes_} found"
- *         self.tree_ = self._build_tree(X, y, adj_matrix, depth=0)
+ *         print(f'{self.mol_net_threshold=}')             # <<<<<<<<<<<<<<
+ *         print('before', adj_matrix.sum()/2)
+ *         adj_matrix = (adj_matrix > self.mol_net_threshold).astype(int)
  */
-  __pyx_t_3 = PyFloat_FromDouble(__pyx_v_self->mol_net_threshold); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 33, __pyx_L1_error)
+  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_self->mol_net_threshold); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 33, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_3 = __Pyx_PyObject_FormatSimpleAndDecref(PyObject_Repr(__pyx_t_1), __pyx_empty_unicode); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 33, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = PyObject_RichCompare(((PyObject *)__pyx_v_adj_matrix), __pyx_t_3, Py_GT); __Pyx_XGOTREF(__pyx_t_2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 33, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_1 = __Pyx_PyUnicode_Concat(__pyx_kp_u_self_mol_net_threshold, __pyx_t_3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 33, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_astype); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 33, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_CallOneArg(__pyx_builtin_print, __pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 33, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+
+  /* "tree.pyx":34
+ *         self.n_classes_ = len(self.classes_)
+ *         print(f'{self.mol_net_threshold=}')
+ *         print('before', adj_matrix.sum()/2)             # <<<<<<<<<<<<<<
+ *         adj_matrix = (adj_matrix > self.mol_net_threshold).astype(int)
+ *         print('after', adj_matrix.sum()/2)
+ */
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_adj_matrix), __pyx_n_s_sum); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 34, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_2 = NULL;
+  __pyx_t_5 = 0;
+  #if CYTHON_UNPACK_METHODS
+  if (likely(PyMethod_Check(__pyx_t_1))) {
+    __pyx_t_2 = PyMethod_GET_SELF(__pyx_t_1);
+    if (likely(__pyx_t_2)) {
+      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_1);
+      __Pyx_INCREF(__pyx_t_2);
+      __Pyx_INCREF(function);
+      __Pyx_DECREF_SET(__pyx_t_1, function);
+      __pyx_t_5 = 1;
+    }
+  }
+  #endif
+  {
+    PyObject *__pyx_callargs[2] = {__pyx_t_2, NULL};
+    __pyx_t_3 = __Pyx_PyObject_FastCall(__pyx_t_1, __pyx_callargs+1-__pyx_t_5, 0+__pyx_t_5);
+    __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
+    if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 34, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_3);
+    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  }
+  __pyx_t_1 = __Pyx_PyInt_TrueDivideObjC(__pyx_t_3, __pyx_int_2, 2, 0, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 34, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 34, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __Pyx_INCREF(__pyx_n_u_before);
+  __Pyx_GIVEREF(__pyx_n_u_before);
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_n_u_before)) __PYX_ERR(0, 34, __pyx_L1_error);
+  __Pyx_GIVEREF(__pyx_t_1);
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_3, 1, __pyx_t_1)) __PYX_ERR(0, 34, __pyx_L1_error);
+  __pyx_t_1 = 0;
+  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_print, __pyx_t_3, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 34, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+
+  /* "tree.pyx":35
+ *         print(f'{self.mol_net_threshold=}')
+ *         print('before', adj_matrix.sum()/2)
+ *         adj_matrix = (adj_matrix > self.mol_net_threshold).astype(int)             # <<<<<<<<<<<<<<
+ *         print('after', adj_matrix.sum()/2)
+ *         assert self.n_classes_ >= 2, f"At least 2 classes should be present in categorical label (y), only {self.n_classes_} found"
+ */
+  __pyx_t_3 = PyFloat_FromDouble(__pyx_v_self->mol_net_threshold); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 35, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __pyx_t_2 = PyObject_RichCompare(((PyObject *)__pyx_v_adj_matrix), __pyx_t_3, Py_GT); __Pyx_XGOTREF(__pyx_t_2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 35, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_astype); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 35, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_t_2 = NULL;
@@ -5495,17 +5587,64 @@ static PyObject *__pyx_f_4tree_33TopologicalDecisionTreeClassifier_fit(struct __
     PyObject *__pyx_callargs[2] = {__pyx_t_2, ((PyObject *)(&PyInt_Type))};
     __pyx_t_1 = __Pyx_PyObject_FastCall(__pyx_t_3, __pyx_callargs+1-__pyx_t_5, 1+__pyx_t_5);
     __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
-    if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 33, __pyx_L1_error)
+    if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 35, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   }
-  if (!(likely(((__pyx_t_1) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_1, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 33, __pyx_L1_error)
+  if (!(likely(((__pyx_t_1) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_1, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 35, __pyx_L1_error)
   __Pyx_DECREF_SET(__pyx_v_adj_matrix, ((PyArrayObject *)__pyx_t_1));
   __pyx_t_1 = 0;
 
-  /* "tree.pyx":34
- *         self.n_classes_ = len(self.classes_)
+  /* "tree.pyx":36
+ *         print('before', adj_matrix.sum()/2)
  *         adj_matrix = (adj_matrix > self.mol_net_threshold).astype(int)
+ *         print('after', adj_matrix.sum()/2)             # <<<<<<<<<<<<<<
+ *         assert self.n_classes_ >= 2, f"At least 2 classes should be present in categorical label (y), only {self.n_classes_} found"
+ *         self.tree_ = self._build_tree(X, y, adj_matrix, depth=0)
+ */
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_adj_matrix), __pyx_n_s_sum); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 36, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __pyx_t_2 = NULL;
+  __pyx_t_5 = 0;
+  #if CYTHON_UNPACK_METHODS
+  if (likely(PyMethod_Check(__pyx_t_3))) {
+    __pyx_t_2 = PyMethod_GET_SELF(__pyx_t_3);
+    if (likely(__pyx_t_2)) {
+      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_3);
+      __Pyx_INCREF(__pyx_t_2);
+      __Pyx_INCREF(function);
+      __Pyx_DECREF_SET(__pyx_t_3, function);
+      __pyx_t_5 = 1;
+    }
+  }
+  #endif
+  {
+    PyObject *__pyx_callargs[2] = {__pyx_t_2, NULL};
+    __pyx_t_1 = __Pyx_PyObject_FastCall(__pyx_t_3, __pyx_callargs+1-__pyx_t_5, 0+__pyx_t_5);
+    __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
+    if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 36, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_1);
+    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  }
+  __pyx_t_3 = __Pyx_PyInt_TrueDivideObjC(__pyx_t_1, __pyx_int_2, 2, 0, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 36, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_1 = PyTuple_New(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 36, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __Pyx_INCREF(__pyx_n_u_after);
+  __Pyx_GIVEREF(__pyx_n_u_after);
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_n_u_after)) __PYX_ERR(0, 36, __pyx_L1_error);
+  __Pyx_GIVEREF(__pyx_t_3);
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_1, 1, __pyx_t_3)) __PYX_ERR(0, 36, __pyx_L1_error);
+  __pyx_t_3 = 0;
+  __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_print, __pyx_t_1, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 36, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+
+  /* "tree.pyx":37
+ *         adj_matrix = (adj_matrix > self.mol_net_threshold).astype(int)
+ *         print('after', adj_matrix.sum()/2)
  *         assert self.n_classes_ >= 2, f"At least 2 classes should be present in categorical label (y), only {self.n_classes_} found"             # <<<<<<<<<<<<<<
  *         self.tree_ = self._build_tree(X, y, adj_matrix, depth=0)
  *         return self.tree_
@@ -5514,52 +5653,52 @@ static PyObject *__pyx_f_4tree_33TopologicalDecisionTreeClassifier_fit(struct __
   if (unlikely(__pyx_assertions_enabled())) {
     __pyx_t_7 = (__pyx_v_self->n_classes_ >= 2);
     if (unlikely(!__pyx_t_7)) {
-      __pyx_t_1 = PyTuple_New(3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 34, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_1);
+      __pyx_t_3 = PyTuple_New(3); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 37, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_3);
       __pyx_t_6 = 0;
       __pyx_t_8 = 127;
       __Pyx_INCREF(__pyx_kp_u_At_least_2_classes_should_be_pre);
       __pyx_t_6 += 68;
       __Pyx_GIVEREF(__pyx_kp_u_At_least_2_classes_should_be_pre);
-      PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_kp_u_At_least_2_classes_should_be_pre);
-      __pyx_t_3 = __Pyx_PyUnicode_From_int(__pyx_v_self->n_classes_, 0, ' ', 'd'); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 34, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_3);
-      __pyx_t_6 += __Pyx_PyUnicode_GET_LENGTH(__pyx_t_3);
-      __Pyx_GIVEREF(__pyx_t_3);
-      PyTuple_SET_ITEM(__pyx_t_1, 1, __pyx_t_3);
-      __pyx_t_3 = 0;
+      PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_kp_u_At_least_2_classes_should_be_pre);
+      __pyx_t_1 = __Pyx_PyUnicode_From_int(__pyx_v_self->n_classes_, 0, ' ', 'd'); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 37, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_1);
+      __pyx_t_6 += __Pyx_PyUnicode_GET_LENGTH(__pyx_t_1);
+      __Pyx_GIVEREF(__pyx_t_1);
+      PyTuple_SET_ITEM(__pyx_t_3, 1, __pyx_t_1);
+      __pyx_t_1 = 0;
       __Pyx_INCREF(__pyx_kp_u_found);
       __pyx_t_6 += 6;
       __Pyx_GIVEREF(__pyx_kp_u_found);
-      PyTuple_SET_ITEM(__pyx_t_1, 2, __pyx_kp_u_found);
-      __pyx_t_3 = __Pyx_PyUnicode_Join(__pyx_t_1, 3, __pyx_t_6, __pyx_t_8); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 34, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_3);
-      __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-      __Pyx_Raise(__pyx_builtin_AssertionError, __pyx_t_3, 0, 0);
+      PyTuple_SET_ITEM(__pyx_t_3, 2, __pyx_kp_u_found);
+      __pyx_t_1 = __Pyx_PyUnicode_Join(__pyx_t_3, 3, __pyx_t_6, __pyx_t_8); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 37, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-      __PYX_ERR(0, 34, __pyx_L1_error)
+      __Pyx_Raise(__pyx_builtin_AssertionError, __pyx_t_1, 0, 0);
+      __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+      __PYX_ERR(0, 37, __pyx_L1_error)
     }
   }
   #else
-  if ((1)); else __PYX_ERR(0, 34, __pyx_L1_error)
+  if ((1)); else __PYX_ERR(0, 37, __pyx_L1_error)
   #endif
 
-  /* "tree.pyx":35
- *         adj_matrix = (adj_matrix > self.mol_net_threshold).astype(int)
+  /* "tree.pyx":38
+ *         print('after', adj_matrix.sum()/2)
  *         assert self.n_classes_ >= 2, f"At least 2 classes should be present in categorical label (y), only {self.n_classes_} found"
  *         self.tree_ = self._build_tree(X, y, adj_matrix, depth=0)             # <<<<<<<<<<<<<<
  *         return self.tree_
  * 
  */
-  __pyx_t_3 = ((struct __pyx_vtabstruct_4tree_TopologicalDecisionTreeClassifier *)__pyx_v_self->__pyx_vtab)->_build_tree(__pyx_v_self, __pyx_v_X, __pyx_v_y, __pyx_v_adj_matrix, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 35, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  __Pyx_GIVEREF(__pyx_t_3);
+  __pyx_t_1 = ((struct __pyx_vtabstruct_4tree_TopologicalDecisionTreeClassifier *)__pyx_v_self->__pyx_vtab)->_build_tree(__pyx_v_self, __pyx_v_X, __pyx_v_y, __pyx_v_adj_matrix, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 38, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __Pyx_GIVEREF(__pyx_t_1);
   __Pyx_GOTREF(__pyx_v_self->tree_);
   __Pyx_DECREF(__pyx_v_self->tree_);
-  __pyx_v_self->tree_ = ((PyObject*)__pyx_t_3);
-  __pyx_t_3 = 0;
+  __pyx_v_self->tree_ = ((PyObject*)__pyx_t_1);
+  __pyx_t_1 = 0;
 
-  /* "tree.pyx":36
+  /* "tree.pyx":39
  *         assert self.n_classes_ >= 2, f"At least 2 classes should be present in categorical label (y), only {self.n_classes_} found"
  *         self.tree_ = self._build_tree(X, y, adj_matrix, depth=0)
  *         return self.tree_             # <<<<<<<<<<<<<<
@@ -5753,7 +5892,7 @@ static PyObject *__pyx_pf_4tree_33TopologicalDecisionTreeClassifier_2fit(struct 
   return __pyx_r;
 }
 
-/* "tree.pyx":38
+/* "tree.pyx":41
  *         return self.tree_
  * 
  *     cdef dict _build_tree(self, np.ndarray X, np.ndarray y, np.ndarray  adj_matrix, int depth):             # <<<<<<<<<<<<<<
@@ -5789,7 +5928,7 @@ static PyObject *__pyx_f_4tree_33TopologicalDecisionTreeClassifier__build_tree(s
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("_build_tree", 1);
 
-  /* "tree.pyx":39
+  /* "tree.pyx":42
  * 
  *     cdef dict _build_tree(self, np.ndarray X, np.ndarray y, np.ndarray  adj_matrix, int depth):
  *         best_split_feature: Union[int, None] = None             # <<<<<<<<<<<<<<
@@ -5799,7 +5938,7 @@ static PyObject *__pyx_f_4tree_33TopologicalDecisionTreeClassifier__build_tree(s
   __Pyx_INCREF(Py_None);
   __pyx_v_best_split_feature = Py_None;
 
-  /* "tree.pyx":40
+  /* "tree.pyx":43
  *     cdef dict _build_tree(self, np.ndarray X, np.ndarray y, np.ndarray  adj_matrix, int depth):
  *         best_split_feature: Union[int, None] = None
  *         best_split_value: Union[float, None] = None             # <<<<<<<<<<<<<<
@@ -5809,28 +5948,28 @@ static PyObject *__pyx_f_4tree_33TopologicalDecisionTreeClassifier__build_tree(s
   __Pyx_INCREF(Py_None);
   __pyx_v_best_split_value = Py_None;
 
-  /* "tree.pyx":41
+  /* "tree.pyx":44
  *         best_split_feature: Union[int, None] = None
  *         best_split_value: Union[float, None] = None
  *         topo_impurity = self._topological_impurity(y, adj_matrix)             # <<<<<<<<<<<<<<
  *         p_act = (y == 1).sum()/len(y)
  * 
  */
-  __pyx_t_1 = ((struct __pyx_vtabstruct_4tree_TopologicalDecisionTreeClassifier *)__pyx_v_self->__pyx_vtab)->_topological_impurity(__pyx_v_self, __pyx_v_y, __pyx_v_adj_matrix, 0); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 41, __pyx_L1_error)
-  __pyx_t_2 = PyFloat_FromDouble(__pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 41, __pyx_L1_error)
+  __pyx_t_1 = ((struct __pyx_vtabstruct_4tree_TopologicalDecisionTreeClassifier *)__pyx_v_self->__pyx_vtab)->_topological_impurity(__pyx_v_self, __pyx_v_y, __pyx_v_adj_matrix, 0); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 44, __pyx_L1_error)
+  __pyx_t_2 = PyFloat_FromDouble(__pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 44, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_v_topo_impurity = __pyx_t_2;
   __pyx_t_2 = 0;
 
-  /* "tree.pyx":42
+  /* "tree.pyx":45
  *         best_split_value: Union[float, None] = None
  *         topo_impurity = self._topological_impurity(y, adj_matrix)
  *         p_act = (y == 1).sum()/len(y)             # <<<<<<<<<<<<<<
  * 
  *         if (depth == self.max_depth or
  */
-  __pyx_t_3 = PyObject_RichCompare(((PyObject *)__pyx_v_y), __pyx_int_1, Py_EQ); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 42, __pyx_L1_error)
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_sum); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 42, __pyx_L1_error)
+  __pyx_t_3 = PyObject_RichCompare(((PyObject *)__pyx_v_y), __pyx_int_1, Py_EQ); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 45, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_sum); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 45, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_3 = NULL;
@@ -5851,21 +5990,21 @@ static PyObject *__pyx_f_4tree_33TopologicalDecisionTreeClassifier__build_tree(s
     PyObject *__pyx_callargs[2] = {__pyx_t_3, NULL};
     __pyx_t_2 = __Pyx_PyObject_FastCall(__pyx_t_4, __pyx_callargs+1-__pyx_t_5, 0+__pyx_t_5);
     __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
-    if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 42, __pyx_L1_error)
+    if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 45, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   }
-  __pyx_t_6 = PyObject_Length(((PyObject *)__pyx_v_y)); if (unlikely(__pyx_t_6 == ((Py_ssize_t)-1))) __PYX_ERR(0, 42, __pyx_L1_error)
-  __pyx_t_4 = PyInt_FromSsize_t(__pyx_t_6); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 42, __pyx_L1_error)
+  __pyx_t_6 = PyObject_Length(((PyObject *)__pyx_v_y)); if (unlikely(__pyx_t_6 == ((Py_ssize_t)-1))) __PYX_ERR(0, 45, __pyx_L1_error)
+  __pyx_t_4 = PyInt_FromSsize_t(__pyx_t_6); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 45, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_3 = __Pyx_PyNumber_Divide(__pyx_t_2, __pyx_t_4); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 42, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyNumber_Divide(__pyx_t_2, __pyx_t_4); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 45, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __pyx_v_p_act = __pyx_t_3;
   __pyx_t_3 = 0;
 
-  /* "tree.pyx":44
+  /* "tree.pyx":47
  *         p_act = (y == 1).sum()/len(y)
  * 
  *         if (depth == self.max_depth or             # <<<<<<<<<<<<<<
@@ -5879,16 +6018,16 @@ static PyObject *__pyx_f_4tree_33TopologicalDecisionTreeClassifier__build_tree(s
     goto __pyx_L4_bool_binop_done;
   }
 
-  /* "tree.pyx":45
+  /* "tree.pyx":48
  * 
  *         if (depth == self.max_depth or
  *             len(np.unique(y)) == 1 or             # <<<<<<<<<<<<<<
  *             len(y) <= self.min_samples_split):
  *             leaf_node = self._create_leaf_node(y)
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_np); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 45, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_np); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 48, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_unique); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 45, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_unique); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 48, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __pyx_t_4 = NULL;
@@ -5909,11 +6048,11 @@ static PyObject *__pyx_f_4tree_33TopologicalDecisionTreeClassifier__build_tree(s
     PyObject *__pyx_callargs[2] = {__pyx_t_4, ((PyObject *)__pyx_v_y)};
     __pyx_t_3 = __Pyx_PyObject_FastCall(__pyx_t_2, __pyx_callargs+1-__pyx_t_5, 1+__pyx_t_5);
     __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
-    if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 45, __pyx_L1_error)
+    if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 48, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   }
-  __pyx_t_6 = PyObject_Length(__pyx_t_3); if (unlikely(__pyx_t_6 == ((Py_ssize_t)-1))) __PYX_ERR(0, 45, __pyx_L1_error)
+  __pyx_t_6 = PyObject_Length(__pyx_t_3); if (unlikely(__pyx_t_6 == ((Py_ssize_t)-1))) __PYX_ERR(0, 48, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_8 = (__pyx_t_6 == 1);
   if (!__pyx_t_8) {
@@ -5922,19 +6061,19 @@ static PyObject *__pyx_f_4tree_33TopologicalDecisionTreeClassifier__build_tree(s
     goto __pyx_L4_bool_binop_done;
   }
 
-  /* "tree.pyx":46
+  /* "tree.pyx":49
  *         if (depth == self.max_depth or
  *             len(np.unique(y)) == 1 or
  *             len(y) <= self.min_samples_split):             # <<<<<<<<<<<<<<
  *             leaf_node = self._create_leaf_node(y)
  *             leaf_node['topological_impurity'] = topo_impurity
  */
-  __pyx_t_6 = PyObject_Length(((PyObject *)__pyx_v_y)); if (unlikely(__pyx_t_6 == ((Py_ssize_t)-1))) __PYX_ERR(0, 46, __pyx_L1_error)
+  __pyx_t_6 = PyObject_Length(((PyObject *)__pyx_v_y)); if (unlikely(__pyx_t_6 == ((Py_ssize_t)-1))) __PYX_ERR(0, 49, __pyx_L1_error)
   __pyx_t_8 = (__pyx_t_6 <= __pyx_v_self->min_samples_split);
   __pyx_t_7 = __pyx_t_8;
   __pyx_L4_bool_binop_done:;
 
-  /* "tree.pyx":44
+  /* "tree.pyx":47
  *         p_act = (y == 1).sum()/len(y)
  * 
  *         if (depth == self.max_depth or             # <<<<<<<<<<<<<<
@@ -5943,19 +6082,19 @@ static PyObject *__pyx_f_4tree_33TopologicalDecisionTreeClassifier__build_tree(s
  */
   if (__pyx_t_7) {
 
-    /* "tree.pyx":47
+    /* "tree.pyx":50
  *             len(np.unique(y)) == 1 or
  *             len(y) <= self.min_samples_split):
  *             leaf_node = self._create_leaf_node(y)             # <<<<<<<<<<<<<<
  *             leaf_node['topological_impurity'] = topo_impurity
  *             leaf_node['P_active'] = p_act
  */
-    __pyx_t_3 = ((struct __pyx_vtabstruct_4tree_TopologicalDecisionTreeClassifier *)__pyx_v_self->__pyx_vtab)->_create_leaf_node(__pyx_v_self, __pyx_v_y); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 47, __pyx_L1_error)
+    __pyx_t_3 = ((struct __pyx_vtabstruct_4tree_TopologicalDecisionTreeClassifier *)__pyx_v_self->__pyx_vtab)->_create_leaf_node(__pyx_v_self, __pyx_v_y); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 50, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __pyx_v_leaf_node = ((PyObject*)__pyx_t_3);
     __pyx_t_3 = 0;
 
-    /* "tree.pyx":48
+    /* "tree.pyx":51
  *             len(y) <= self.min_samples_split):
  *             leaf_node = self._create_leaf_node(y)
  *             leaf_node['topological_impurity'] = topo_impurity             # <<<<<<<<<<<<<<
@@ -5964,11 +6103,11 @@ static PyObject *__pyx_f_4tree_33TopologicalDecisionTreeClassifier__build_tree(s
  */
     if (unlikely(__pyx_v_leaf_node == Py_None)) {
       PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
-      __PYX_ERR(0, 48, __pyx_L1_error)
+      __PYX_ERR(0, 51, __pyx_L1_error)
     }
-    if (unlikely((PyDict_SetItem(__pyx_v_leaf_node, __pyx_n_u_topological_impurity, __pyx_v_topo_impurity) < 0))) __PYX_ERR(0, 48, __pyx_L1_error)
+    if (unlikely((PyDict_SetItem(__pyx_v_leaf_node, __pyx_n_u_topological_impurity, __pyx_v_topo_impurity) < 0))) __PYX_ERR(0, 51, __pyx_L1_error)
 
-    /* "tree.pyx":49
+    /* "tree.pyx":52
  *             leaf_node = self._create_leaf_node(y)
  *             leaf_node['topological_impurity'] = topo_impurity
  *             leaf_node['P_active'] = p_act             # <<<<<<<<<<<<<<
@@ -5977,11 +6116,11 @@ static PyObject *__pyx_f_4tree_33TopologicalDecisionTreeClassifier__build_tree(s
  */
     if (unlikely(__pyx_v_leaf_node == Py_None)) {
       PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
-      __PYX_ERR(0, 49, __pyx_L1_error)
+      __PYX_ERR(0, 52, __pyx_L1_error)
     }
-    if (unlikely((PyDict_SetItem(__pyx_v_leaf_node, __pyx_n_u_P_active, __pyx_v_p_act) < 0))) __PYX_ERR(0, 49, __pyx_L1_error)
+    if (unlikely((PyDict_SetItem(__pyx_v_leaf_node, __pyx_n_u_P_active, __pyx_v_p_act) < 0))) __PYX_ERR(0, 52, __pyx_L1_error)
 
-    /* "tree.pyx":50
+    /* "tree.pyx":53
  *             leaf_node['topological_impurity'] = topo_impurity
  *             leaf_node['P_active'] = p_act
  *             return leaf_node             # <<<<<<<<<<<<<<
@@ -5993,7 +6132,7 @@ static PyObject *__pyx_f_4tree_33TopologicalDecisionTreeClassifier__build_tree(s
     __pyx_r = __pyx_v_leaf_node;
     goto __pyx_L0;
 
-    /* "tree.pyx":44
+    /* "tree.pyx":47
  *         p_act = (y == 1).sum()/len(y)
  * 
  *         if (depth == self.max_depth or             # <<<<<<<<<<<<<<
@@ -6002,14 +6141,14 @@ static PyObject *__pyx_f_4tree_33TopologicalDecisionTreeClassifier__build_tree(s
  */
   }
 
-  /* "tree.pyx":52
+  /* "tree.pyx":55
  *             return leaf_node
  * 
  *         best_split_feature, best_split_value = self._find_best_split(X, y, adj_matrix)             # <<<<<<<<<<<<<<
  *         if best_split_feature is None:
  *             leaf_node = self._create_leaf_node(y)
  */
-  __pyx_t_3 = ((struct __pyx_vtabstruct_4tree_TopologicalDecisionTreeClassifier *)__pyx_v_self->__pyx_vtab)->_find_best_split(__pyx_v_self, __pyx_v_X, __pyx_v_y, __pyx_v_adj_matrix, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 52, __pyx_L1_error)
+  __pyx_t_3 = ((struct __pyx_vtabstruct_4tree_TopologicalDecisionTreeClassifier *)__pyx_v_self->__pyx_vtab)->_find_best_split(__pyx_v_self, __pyx_v_X, __pyx_v_y, __pyx_v_adj_matrix, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 55, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   if ((likely(PyTuple_CheckExact(__pyx_t_3))) || (PyList_CheckExact(__pyx_t_3))) {
     PyObject* sequence = __pyx_t_3;
@@ -6017,7 +6156,7 @@ static PyObject *__pyx_f_4tree_33TopologicalDecisionTreeClassifier__build_tree(s
     if (unlikely(size != 2)) {
       if (size > 2) __Pyx_RaiseTooManyValuesError(2);
       else if (size >= 0) __Pyx_RaiseNeedMoreValuesError(size);
-      __PYX_ERR(0, 52, __pyx_L1_error)
+      __PYX_ERR(0, 55, __pyx_L1_error)
     }
     #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
     if (likely(PyTuple_CheckExact(sequence))) {
@@ -6030,15 +6169,15 @@ static PyObject *__pyx_f_4tree_33TopologicalDecisionTreeClassifier__build_tree(s
     __Pyx_INCREF(__pyx_t_2);
     __Pyx_INCREF(__pyx_t_4);
     #else
-    __pyx_t_2 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 52, __pyx_L1_error)
+    __pyx_t_2 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 55, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_4 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 52, __pyx_L1_error)
+    __pyx_t_4 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 55, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     #endif
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   } else {
     Py_ssize_t index = -1;
-    __pyx_t_9 = PyObject_GetIter(__pyx_t_3); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 52, __pyx_L1_error)
+    __pyx_t_9 = PyObject_GetIter(__pyx_t_3); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 55, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_9);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     __pyx_t_10 = __Pyx_PyObject_GetIterNextFunc(__pyx_t_9);
@@ -6046,7 +6185,7 @@ static PyObject *__pyx_f_4tree_33TopologicalDecisionTreeClassifier__build_tree(s
     __Pyx_GOTREF(__pyx_t_2);
     index = 1; __pyx_t_4 = __pyx_t_10(__pyx_t_9); if (unlikely(!__pyx_t_4)) goto __pyx_L7_unpacking_failed;
     __Pyx_GOTREF(__pyx_t_4);
-    if (__Pyx_IternextUnpackEndCheck(__pyx_t_10(__pyx_t_9), 2) < 0) __PYX_ERR(0, 52, __pyx_L1_error)
+    if (__Pyx_IternextUnpackEndCheck(__pyx_t_10(__pyx_t_9), 2) < 0) __PYX_ERR(0, 55, __pyx_L1_error)
     __pyx_t_10 = NULL;
     __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
     goto __pyx_L8_unpacking_done;
@@ -6054,7 +6193,7 @@ static PyObject *__pyx_f_4tree_33TopologicalDecisionTreeClassifier__build_tree(s
     __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
     __pyx_t_10 = NULL;
     if (__Pyx_IterFinish() == 0) __Pyx_RaiseNeedMoreValuesError(index);
-    __PYX_ERR(0, 52, __pyx_L1_error)
+    __PYX_ERR(0, 55, __pyx_L1_error)
     __pyx_L8_unpacking_done:;
   }
   __Pyx_DECREF_SET(__pyx_v_best_split_feature, __pyx_t_2);
@@ -6062,7 +6201,7 @@ static PyObject *__pyx_f_4tree_33TopologicalDecisionTreeClassifier__build_tree(s
   __Pyx_DECREF_SET(__pyx_v_best_split_value, __pyx_t_4);
   __pyx_t_4 = 0;
 
-  /* "tree.pyx":53
+  /* "tree.pyx":56
  * 
  *         best_split_feature, best_split_value = self._find_best_split(X, y, adj_matrix)
  *         if best_split_feature is None:             # <<<<<<<<<<<<<<
@@ -6072,19 +6211,19 @@ static PyObject *__pyx_f_4tree_33TopologicalDecisionTreeClassifier__build_tree(s
   __pyx_t_7 = (__pyx_v_best_split_feature == Py_None);
   if (__pyx_t_7) {
 
-    /* "tree.pyx":54
+    /* "tree.pyx":57
  *         best_split_feature, best_split_value = self._find_best_split(X, y, adj_matrix)
  *         if best_split_feature is None:
  *             leaf_node = self._create_leaf_node(y)             # <<<<<<<<<<<<<<
  *             leaf_node['topological_impurity'] = topo_impurity
  *             leaf_node['P_active'] = p_act
  */
-    __pyx_t_3 = ((struct __pyx_vtabstruct_4tree_TopologicalDecisionTreeClassifier *)__pyx_v_self->__pyx_vtab)->_create_leaf_node(__pyx_v_self, __pyx_v_y); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 54, __pyx_L1_error)
+    __pyx_t_3 = ((struct __pyx_vtabstruct_4tree_TopologicalDecisionTreeClassifier *)__pyx_v_self->__pyx_vtab)->_create_leaf_node(__pyx_v_self, __pyx_v_y); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 57, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __pyx_v_leaf_node = ((PyObject*)__pyx_t_3);
     __pyx_t_3 = 0;
 
-    /* "tree.pyx":55
+    /* "tree.pyx":58
  *         if best_split_feature is None:
  *             leaf_node = self._create_leaf_node(y)
  *             leaf_node['topological_impurity'] = topo_impurity             # <<<<<<<<<<<<<<
@@ -6093,11 +6232,11 @@ static PyObject *__pyx_f_4tree_33TopologicalDecisionTreeClassifier__build_tree(s
  */
     if (unlikely(__pyx_v_leaf_node == Py_None)) {
       PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
-      __PYX_ERR(0, 55, __pyx_L1_error)
+      __PYX_ERR(0, 58, __pyx_L1_error)
     }
-    if (unlikely((PyDict_SetItem(__pyx_v_leaf_node, __pyx_n_u_topological_impurity, __pyx_v_topo_impurity) < 0))) __PYX_ERR(0, 55, __pyx_L1_error)
+    if (unlikely((PyDict_SetItem(__pyx_v_leaf_node, __pyx_n_u_topological_impurity, __pyx_v_topo_impurity) < 0))) __PYX_ERR(0, 58, __pyx_L1_error)
 
-    /* "tree.pyx":56
+    /* "tree.pyx":59
  *             leaf_node = self._create_leaf_node(y)
  *             leaf_node['topological_impurity'] = topo_impurity
  *             leaf_node['P_active'] = p_act             # <<<<<<<<<<<<<<
@@ -6106,11 +6245,11 @@ static PyObject *__pyx_f_4tree_33TopologicalDecisionTreeClassifier__build_tree(s
  */
     if (unlikely(__pyx_v_leaf_node == Py_None)) {
       PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
-      __PYX_ERR(0, 56, __pyx_L1_error)
+      __PYX_ERR(0, 59, __pyx_L1_error)
     }
-    if (unlikely((PyDict_SetItem(__pyx_v_leaf_node, __pyx_n_u_P_active, __pyx_v_p_act) < 0))) __PYX_ERR(0, 56, __pyx_L1_error)
+    if (unlikely((PyDict_SetItem(__pyx_v_leaf_node, __pyx_n_u_P_active, __pyx_v_p_act) < 0))) __PYX_ERR(0, 59, __pyx_L1_error)
 
-    /* "tree.pyx":57
+    /* "tree.pyx":60
  *             leaf_node['topological_impurity'] = topo_impurity
  *             leaf_node['P_active'] = p_act
  *             return leaf_node             # <<<<<<<<<<<<<<
@@ -6122,7 +6261,7 @@ static PyObject *__pyx_f_4tree_33TopologicalDecisionTreeClassifier__build_tree(s
     __pyx_r = __pyx_v_leaf_node;
     goto __pyx_L0;
 
-    /* "tree.pyx":53
+    /* "tree.pyx":56
  * 
  *         best_split_feature, best_split_value = self._find_best_split(X, y, adj_matrix)
  *         if best_split_feature is None:             # <<<<<<<<<<<<<<
@@ -6131,70 +6270,70 @@ static PyObject *__pyx_f_4tree_33TopologicalDecisionTreeClassifier__build_tree(s
  */
   }
 
-  /* "tree.pyx":59
+  /* "tree.pyx":62
  *             return leaf_node
  * 
  *         left_indices = X[:, best_split_feature] <= best_split_value             # <<<<<<<<<<<<<<
  *         right_indices = ~left_indices
  * 
  */
-  __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 59, __pyx_L1_error)
+  __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 62, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_INCREF(__pyx_slice__6);
   __Pyx_GIVEREF(__pyx_slice__6);
-  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_slice__6)) __PYX_ERR(0, 59, __pyx_L1_error);
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_slice__6)) __PYX_ERR(0, 62, __pyx_L1_error);
   __Pyx_INCREF(__pyx_v_best_split_feature);
   __Pyx_GIVEREF(__pyx_v_best_split_feature);
-  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_3, 1, __pyx_v_best_split_feature)) __PYX_ERR(0, 59, __pyx_L1_error);
-  __pyx_t_4 = __Pyx_PyObject_GetItem(((PyObject *)__pyx_v_X), __pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 59, __pyx_L1_error)
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_3, 1, __pyx_v_best_split_feature)) __PYX_ERR(0, 62, __pyx_L1_error);
+  __pyx_t_4 = __Pyx_PyObject_GetItem(((PyObject *)__pyx_v_X), __pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 62, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = PyObject_RichCompare(__pyx_t_4, __pyx_v_best_split_value, Py_LE); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 59, __pyx_L1_error)
+  __pyx_t_3 = PyObject_RichCompare(__pyx_t_4, __pyx_v_best_split_value, Py_LE); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 62, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __pyx_v_left_indices = __pyx_t_3;
   __pyx_t_3 = 0;
 
-  /* "tree.pyx":60
+  /* "tree.pyx":63
  * 
  *         left_indices = X[:, best_split_feature] <= best_split_value
  *         right_indices = ~left_indices             # <<<<<<<<<<<<<<
  * 
  *         left_tree = self._build_tree(X[left_indices], y[left_indices], adj_matrix[left_indices][:, left_indices], depth + 1)
  */
-  __pyx_t_3 = PyNumber_Invert(__pyx_v_left_indices); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 60, __pyx_L1_error)
+  __pyx_t_3 = PyNumber_Invert(__pyx_v_left_indices); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 63, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __pyx_v_right_indices = __pyx_t_3;
   __pyx_t_3 = 0;
 
-  /* "tree.pyx":62
+  /* "tree.pyx":65
  *         right_indices = ~left_indices
  * 
  *         left_tree = self._build_tree(X[left_indices], y[left_indices], adj_matrix[left_indices][:, left_indices], depth + 1)             # <<<<<<<<<<<<<<
  *         right_tree = self._build_tree(X[right_indices], y[right_indices], adj_matrix[right_indices][:, right_indices], depth + 1)
  * 
  */
-  __pyx_t_3 = __Pyx_PyObject_GetItem(((PyObject *)__pyx_v_X), __pyx_v_left_indices); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 62, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_GetItem(((PyObject *)__pyx_v_X), __pyx_v_left_indices); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 65, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  if (!(likely(((__pyx_t_3) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_3, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 62, __pyx_L1_error)
-  __pyx_t_4 = __Pyx_PyObject_GetItem(((PyObject *)__pyx_v_y), __pyx_v_left_indices); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 62, __pyx_L1_error)
+  if (!(likely(((__pyx_t_3) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_3, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 65, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_GetItem(((PyObject *)__pyx_v_y), __pyx_v_left_indices); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 65, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  if (!(likely(((__pyx_t_4) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_4, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 62, __pyx_L1_error)
-  __pyx_t_2 = __Pyx_PyObject_GetItem(((PyObject *)__pyx_v_adj_matrix), __pyx_v_left_indices); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 62, __pyx_L1_error)
+  if (!(likely(((__pyx_t_4) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_4, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 65, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetItem(((PyObject *)__pyx_v_adj_matrix), __pyx_v_left_indices); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 65, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_9 = PyTuple_New(2); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 62, __pyx_L1_error)
+  __pyx_t_9 = PyTuple_New(2); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 65, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_9);
   __Pyx_INCREF(__pyx_slice__6);
   __Pyx_GIVEREF(__pyx_slice__6);
-  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_9, 0, __pyx_slice__6)) __PYX_ERR(0, 62, __pyx_L1_error);
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_9, 0, __pyx_slice__6)) __PYX_ERR(0, 65, __pyx_L1_error);
   __Pyx_INCREF(__pyx_v_left_indices);
   __Pyx_GIVEREF(__pyx_v_left_indices);
-  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_9, 1, __pyx_v_left_indices)) __PYX_ERR(0, 62, __pyx_L1_error);
-  __pyx_t_11 = __Pyx_PyObject_GetItem(__pyx_t_2, __pyx_t_9); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 62, __pyx_L1_error)
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_9, 1, __pyx_v_left_indices)) __PYX_ERR(0, 65, __pyx_L1_error);
+  __pyx_t_11 = __Pyx_PyObject_GetItem(__pyx_t_2, __pyx_t_9); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 65, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_11);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
-  if (!(likely(((__pyx_t_11) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_11, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 62, __pyx_L1_error)
-  __pyx_t_9 = ((struct __pyx_vtabstruct_4tree_TopologicalDecisionTreeClassifier *)__pyx_v_self->__pyx_vtab)->_build_tree(__pyx_v_self, ((PyArrayObject *)__pyx_t_3), ((PyArrayObject *)__pyx_t_4), ((PyArrayObject *)__pyx_t_11), (__pyx_v_depth + 1)); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 62, __pyx_L1_error)
+  if (!(likely(((__pyx_t_11) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_11, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 65, __pyx_L1_error)
+  __pyx_t_9 = ((struct __pyx_vtabstruct_4tree_TopologicalDecisionTreeClassifier *)__pyx_v_self->__pyx_vtab)->_build_tree(__pyx_v_self, ((PyArrayObject *)__pyx_t_3), ((PyArrayObject *)__pyx_t_4), ((PyArrayObject *)__pyx_t_11), (__pyx_v_depth + 1)); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 65, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_9);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
@@ -6202,35 +6341,35 @@ static PyObject *__pyx_f_4tree_33TopologicalDecisionTreeClassifier__build_tree(s
   __pyx_v_left_tree = ((PyObject*)__pyx_t_9);
   __pyx_t_9 = 0;
 
-  /* "tree.pyx":63
+  /* "tree.pyx":66
  * 
  *         left_tree = self._build_tree(X[left_indices], y[left_indices], adj_matrix[left_indices][:, left_indices], depth + 1)
  *         right_tree = self._build_tree(X[right_indices], y[right_indices], adj_matrix[right_indices][:, right_indices], depth + 1)             # <<<<<<<<<<<<<<
  * 
  *         return {'split_feature': best_split_feature,
  */
-  __pyx_t_9 = __Pyx_PyObject_GetItem(((PyObject *)__pyx_v_X), __pyx_v_right_indices); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 63, __pyx_L1_error)
+  __pyx_t_9 = __Pyx_PyObject_GetItem(((PyObject *)__pyx_v_X), __pyx_v_right_indices); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 66, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_9);
-  if (!(likely(((__pyx_t_9) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_9, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 63, __pyx_L1_error)
-  __pyx_t_11 = __Pyx_PyObject_GetItem(((PyObject *)__pyx_v_y), __pyx_v_right_indices); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 63, __pyx_L1_error)
+  if (!(likely(((__pyx_t_9) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_9, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 66, __pyx_L1_error)
+  __pyx_t_11 = __Pyx_PyObject_GetItem(((PyObject *)__pyx_v_y), __pyx_v_right_indices); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 66, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_11);
-  if (!(likely(((__pyx_t_11) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_11, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 63, __pyx_L1_error)
-  __pyx_t_4 = __Pyx_PyObject_GetItem(((PyObject *)__pyx_v_adj_matrix), __pyx_v_right_indices); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 63, __pyx_L1_error)
+  if (!(likely(((__pyx_t_11) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_11, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 66, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_GetItem(((PyObject *)__pyx_v_adj_matrix), __pyx_v_right_indices); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 66, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 63, __pyx_L1_error)
+  __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 66, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_INCREF(__pyx_slice__6);
   __Pyx_GIVEREF(__pyx_slice__6);
-  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_slice__6)) __PYX_ERR(0, 63, __pyx_L1_error);
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_slice__6)) __PYX_ERR(0, 66, __pyx_L1_error);
   __Pyx_INCREF(__pyx_v_right_indices);
   __Pyx_GIVEREF(__pyx_v_right_indices);
-  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_3, 1, __pyx_v_right_indices)) __PYX_ERR(0, 63, __pyx_L1_error);
-  __pyx_t_2 = __Pyx_PyObject_GetItem(__pyx_t_4, __pyx_t_3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 63, __pyx_L1_error)
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_3, 1, __pyx_v_right_indices)) __PYX_ERR(0, 66, __pyx_L1_error);
+  __pyx_t_2 = __Pyx_PyObject_GetItem(__pyx_t_4, __pyx_t_3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 66, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  if (!(likely(((__pyx_t_2) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_2, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 63, __pyx_L1_error)
-  __pyx_t_3 = ((struct __pyx_vtabstruct_4tree_TopologicalDecisionTreeClassifier *)__pyx_v_self->__pyx_vtab)->_build_tree(__pyx_v_self, ((PyArrayObject *)__pyx_t_9), ((PyArrayObject *)__pyx_t_11), ((PyArrayObject *)__pyx_t_2), (__pyx_v_depth + 1)); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 63, __pyx_L1_error)
+  if (!(likely(((__pyx_t_2) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_2, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 66, __pyx_L1_error)
+  __pyx_t_3 = ((struct __pyx_vtabstruct_4tree_TopologicalDecisionTreeClassifier *)__pyx_v_self->__pyx_vtab)->_build_tree(__pyx_v_self, ((PyArrayObject *)__pyx_t_9), ((PyArrayObject *)__pyx_t_11), ((PyArrayObject *)__pyx_t_2), (__pyx_v_depth + 1)); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 66, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
   __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
@@ -6238,7 +6377,7 @@ static PyObject *__pyx_f_4tree_33TopologicalDecisionTreeClassifier__build_tree(s
   __pyx_v_right_tree = ((PyObject*)__pyx_t_3);
   __pyx_t_3 = 0;
 
-  /* "tree.pyx":65
+  /* "tree.pyx":68
  *         right_tree = self._build_tree(X[right_indices], y[right_indices], adj_matrix[right_indices][:, right_indices], depth + 1)
  * 
  *         return {'split_feature': best_split_feature,             # <<<<<<<<<<<<<<
@@ -6246,59 +6385,59 @@ static PyObject *__pyx_f_4tree_33TopologicalDecisionTreeClassifier__build_tree(s
  *                 'left': left_tree,
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_3 = __Pyx_PyDict_NewPresized(6); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 65, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyDict_NewPresized(6); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 68, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  if (PyDict_SetItem(__pyx_t_3, __pyx_n_u_split_feature, __pyx_v_best_split_feature) < 0) __PYX_ERR(0, 65, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_3, __pyx_n_u_split_feature, __pyx_v_best_split_feature) < 0) __PYX_ERR(0, 68, __pyx_L1_error)
 
-  /* "tree.pyx":66
+  /* "tree.pyx":69
  * 
  *         return {'split_feature': best_split_feature,
  *                 'split_value': best_split_value,             # <<<<<<<<<<<<<<
  *                 'left': left_tree,
  *                 'right': right_tree,
  */
-  if (PyDict_SetItem(__pyx_t_3, __pyx_n_u_split_value, __pyx_v_best_split_value) < 0) __PYX_ERR(0, 65, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_3, __pyx_n_u_split_value, __pyx_v_best_split_value) < 0) __PYX_ERR(0, 68, __pyx_L1_error)
 
-  /* "tree.pyx":67
+  /* "tree.pyx":70
  *         return {'split_feature': best_split_feature,
  *                 'split_value': best_split_value,
  *                 'left': left_tree,             # <<<<<<<<<<<<<<
  *                 'right': right_tree,
  *                 'topological_impurity': topo_impurity,
  */
-  if (PyDict_SetItem(__pyx_t_3, __pyx_n_u_left, __pyx_v_left_tree) < 0) __PYX_ERR(0, 65, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_3, __pyx_n_u_left, __pyx_v_left_tree) < 0) __PYX_ERR(0, 68, __pyx_L1_error)
 
-  /* "tree.pyx":68
+  /* "tree.pyx":71
  *                 'split_value': best_split_value,
  *                 'left': left_tree,
  *                 'right': right_tree,             # <<<<<<<<<<<<<<
  *                 'topological_impurity': topo_impurity,
  *                 'P_active': p_act}
  */
-  if (PyDict_SetItem(__pyx_t_3, __pyx_n_u_right, __pyx_v_right_tree) < 0) __PYX_ERR(0, 65, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_3, __pyx_n_u_right, __pyx_v_right_tree) < 0) __PYX_ERR(0, 68, __pyx_L1_error)
 
-  /* "tree.pyx":69
+  /* "tree.pyx":72
  *                 'left': left_tree,
  *                 'right': right_tree,
  *                 'topological_impurity': topo_impurity,             # <<<<<<<<<<<<<<
  *                 'P_active': p_act}
  * 
  */
-  if (PyDict_SetItem(__pyx_t_3, __pyx_n_u_topological_impurity, __pyx_v_topo_impurity) < 0) __PYX_ERR(0, 65, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_3, __pyx_n_u_topological_impurity, __pyx_v_topo_impurity) < 0) __PYX_ERR(0, 68, __pyx_L1_error)
 
-  /* "tree.pyx":70
+  /* "tree.pyx":73
  *                 'right': right_tree,
  *                 'topological_impurity': topo_impurity,
  *                 'P_active': p_act}             # <<<<<<<<<<<<<<
  * 
  * 
  */
-  if (PyDict_SetItem(__pyx_t_3, __pyx_n_u_P_active, __pyx_v_p_act) < 0) __PYX_ERR(0, 65, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_3, __pyx_n_u_P_active, __pyx_v_p_act) < 0) __PYX_ERR(0, 68, __pyx_L1_error)
   __pyx_r = ((PyObject*)__pyx_t_3);
   __pyx_t_3 = 0;
   goto __pyx_L0;
 
-  /* "tree.pyx":38
+  /* "tree.pyx":41
  *         return self.tree_
  * 
  *     cdef dict _build_tree(self, np.ndarray X, np.ndarray y, np.ndarray  adj_matrix, int depth):             # <<<<<<<<<<<<<<
@@ -6330,7 +6469,7 @@ static PyObject *__pyx_f_4tree_33TopologicalDecisionTreeClassifier__build_tree(s
   return __pyx_r;
 }
 
-/* "tree.pyx":73
+/* "tree.pyx":76
  * 
  * 
  *     cdef dict _create_leaf_node(self, np.ndarray y):             # <<<<<<<<<<<<<<
@@ -6357,7 +6496,7 @@ static PyObject *__pyx_f_4tree_33TopologicalDecisionTreeClassifier__create_leaf_
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("_create_leaf_node", 1);
 
-  /* "tree.pyx":74
+  /* "tree.pyx":77
  * 
  *     cdef dict _create_leaf_node(self, np.ndarray y):
  *         assert y.shape[0] > 0, "y is empty, how to create a leaf node with no data?"             # <<<<<<<<<<<<<<
@@ -6366,38 +6505,38 @@ static PyObject *__pyx_f_4tree_33TopologicalDecisionTreeClassifier__create_leaf_
  */
   #ifndef CYTHON_WITHOUT_ASSERTIONS
   if (unlikely(__pyx_assertions_enabled())) {
-    __pyx_t_1 = __pyx_f_5numpy_7ndarray_5shape_shape(__pyx_v_y); if (unlikely(__pyx_t_1 == ((npy_intp *)NULL) && PyErr_Occurred())) __PYX_ERR(0, 74, __pyx_L1_error)
+    __pyx_t_1 = __pyx_f_5numpy_7ndarray_5shape_shape(__pyx_v_y); if (unlikely(__pyx_t_1 == ((npy_intp *)NULL) && PyErr_Occurred())) __PYX_ERR(0, 77, __pyx_L1_error)
     __pyx_t_2 = ((__pyx_t_1[0]) > 0);
     if (unlikely(!__pyx_t_2)) {
       __Pyx_Raise(__pyx_builtin_AssertionError, __pyx_kp_u_y_is_empty_how_to_create_a_leaf, 0, 0);
-      __PYX_ERR(0, 74, __pyx_L1_error)
+      __PYX_ERR(0, 77, __pyx_L1_error)
     }
   }
   #else
-  if ((1)); else __PYX_ERR(0, 74, __pyx_L1_error)
+  if ((1)); else __PYX_ERR(0, 77, __pyx_L1_error)
   #endif
 
-  /* "tree.pyx":75
+  /* "tree.pyx":78
  *     cdef dict _create_leaf_node(self, np.ndarray y):
  *         assert y.shape[0] > 0, "y is empty, how to create a leaf node with no data?"
  *         unique_classes, counts = np.unique(y, return_counts=True)             # <<<<<<<<<<<<<<
  *         majority_class = unique_classes[np.argmax(counts)]
  *         return {"leaf": True, "class": majority_class}
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_np); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 75, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_np); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 78, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_unique); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 75, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_unique); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 78, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 75, __pyx_L1_error)
+  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 78, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_INCREF((PyObject *)__pyx_v_y);
   __Pyx_GIVEREF((PyObject *)__pyx_v_y);
-  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_3, 0, ((PyObject *)__pyx_v_y))) __PYX_ERR(0, 75, __pyx_L1_error);
-  __pyx_t_5 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 75, __pyx_L1_error)
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_3, 0, ((PyObject *)__pyx_v_y))) __PYX_ERR(0, 78, __pyx_L1_error);
+  __pyx_t_5 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 78, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  if (PyDict_SetItem(__pyx_t_5, __pyx_n_s_return_counts, Py_True) < 0) __PYX_ERR(0, 75, __pyx_L1_error)
-  __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_3, __pyx_t_5); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 75, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_5, __pyx_n_s_return_counts, Py_True) < 0) __PYX_ERR(0, 78, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_3, __pyx_t_5); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 78, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
@@ -6408,7 +6547,7 @@ static PyObject *__pyx_f_4tree_33TopologicalDecisionTreeClassifier__create_leaf_
     if (unlikely(size != 2)) {
       if (size > 2) __Pyx_RaiseTooManyValuesError(2);
       else if (size >= 0) __Pyx_RaiseNeedMoreValuesError(size);
-      __PYX_ERR(0, 75, __pyx_L1_error)
+      __PYX_ERR(0, 78, __pyx_L1_error)
     }
     #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
     if (likely(PyTuple_CheckExact(sequence))) {
@@ -6421,15 +6560,15 @@ static PyObject *__pyx_f_4tree_33TopologicalDecisionTreeClassifier__create_leaf_
     __Pyx_INCREF(__pyx_t_5);
     __Pyx_INCREF(__pyx_t_3);
     #else
-    __pyx_t_5 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 75, __pyx_L1_error)
+    __pyx_t_5 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 78, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
-    __pyx_t_3 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 75, __pyx_L1_error)
+    __pyx_t_3 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 78, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     #endif
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
   } else {
     Py_ssize_t index = -1;
-    __pyx_t_4 = PyObject_GetIter(__pyx_t_6); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 75, __pyx_L1_error)
+    __pyx_t_4 = PyObject_GetIter(__pyx_t_6); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 78, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
     __pyx_t_7 = __Pyx_PyObject_GetIterNextFunc(__pyx_t_4);
@@ -6437,7 +6576,7 @@ static PyObject *__pyx_f_4tree_33TopologicalDecisionTreeClassifier__create_leaf_
     __Pyx_GOTREF(__pyx_t_5);
     index = 1; __pyx_t_3 = __pyx_t_7(__pyx_t_4); if (unlikely(!__pyx_t_3)) goto __pyx_L3_unpacking_failed;
     __Pyx_GOTREF(__pyx_t_3);
-    if (__Pyx_IternextUnpackEndCheck(__pyx_t_7(__pyx_t_4), 2) < 0) __PYX_ERR(0, 75, __pyx_L1_error)
+    if (__Pyx_IternextUnpackEndCheck(__pyx_t_7(__pyx_t_4), 2) < 0) __PYX_ERR(0, 78, __pyx_L1_error)
     __pyx_t_7 = NULL;
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     goto __pyx_L4_unpacking_done;
@@ -6445,7 +6584,7 @@ static PyObject *__pyx_f_4tree_33TopologicalDecisionTreeClassifier__create_leaf_
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     __pyx_t_7 = NULL;
     if (__Pyx_IterFinish() == 0) __Pyx_RaiseNeedMoreValuesError(index);
-    __PYX_ERR(0, 75, __pyx_L1_error)
+    __PYX_ERR(0, 78, __pyx_L1_error)
     __pyx_L4_unpacking_done:;
   }
   __pyx_v_unique_classes = __pyx_t_5;
@@ -6453,16 +6592,16 @@ static PyObject *__pyx_f_4tree_33TopologicalDecisionTreeClassifier__create_leaf_
   __pyx_v_counts = __pyx_t_3;
   __pyx_t_3 = 0;
 
-  /* "tree.pyx":76
+  /* "tree.pyx":79
  *         assert y.shape[0] > 0, "y is empty, how to create a leaf node with no data?"
  *         unique_classes, counts = np.unique(y, return_counts=True)
  *         majority_class = unique_classes[np.argmax(counts)]             # <<<<<<<<<<<<<<
  *         return {"leaf": True, "class": majority_class}
  * 
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_np); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 76, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_np); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 79, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_argmax); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 76, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_argmax); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 79, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_3 = NULL;
@@ -6483,17 +6622,17 @@ static PyObject *__pyx_f_4tree_33TopologicalDecisionTreeClassifier__create_leaf_
     PyObject *__pyx_callargs[2] = {__pyx_t_3, __pyx_v_counts};
     __pyx_t_6 = __Pyx_PyObject_FastCall(__pyx_t_5, __pyx_callargs+1-__pyx_t_8, 1+__pyx_t_8);
     __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
-    if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 76, __pyx_L1_error)
+    if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 79, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   }
-  __pyx_t_5 = __Pyx_PyObject_GetItem(__pyx_v_unique_classes, __pyx_t_6); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 76, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyObject_GetItem(__pyx_v_unique_classes, __pyx_t_6); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 79, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
   __pyx_v_majority_class = __pyx_t_5;
   __pyx_t_5 = 0;
 
-  /* "tree.pyx":77
+  /* "tree.pyx":80
  *         unique_classes, counts = np.unique(y, return_counts=True)
  *         majority_class = unique_classes[np.argmax(counts)]
  *         return {"leaf": True, "class": majority_class}             # <<<<<<<<<<<<<<
@@ -6501,15 +6640,15 @@ static PyObject *__pyx_f_4tree_33TopologicalDecisionTreeClassifier__create_leaf_
  *     cpdef np.float64_t _topological_impurity(self, np.ndarray y, np.ndarray adj_matrix):
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_5 = __Pyx_PyDict_NewPresized(2); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 77, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyDict_NewPresized(2); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 80, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  if (PyDict_SetItem(__pyx_t_5, __pyx_n_u_leaf, Py_True) < 0) __PYX_ERR(0, 77, __pyx_L1_error)
-  if (PyDict_SetItem(__pyx_t_5, __pyx_n_u_class, __pyx_v_majority_class) < 0) __PYX_ERR(0, 77, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_5, __pyx_n_u_leaf, Py_True) < 0) __PYX_ERR(0, 80, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_5, __pyx_n_u_class, __pyx_v_majority_class) < 0) __PYX_ERR(0, 80, __pyx_L1_error)
   __pyx_r = ((PyObject*)__pyx_t_5);
   __pyx_t_5 = 0;
   goto __pyx_L0;
 
-  /* "tree.pyx":73
+  /* "tree.pyx":76
  * 
  * 
  *     cdef dict _create_leaf_node(self, np.ndarray y):             # <<<<<<<<<<<<<<
@@ -6534,7 +6673,7 @@ static PyObject *__pyx_f_4tree_33TopologicalDecisionTreeClassifier__create_leaf_
   return __pyx_r;
 }
 
-/* "tree.pyx":79
+/* "tree.pyx":82
  *         return {"leaf": True, "class": majority_class}
  * 
  *     cpdef np.float64_t _topological_impurity(self, np.ndarray y, np.ndarray adj_matrix):             # <<<<<<<<<<<<<<
@@ -6580,7 +6719,7 @@ static __pyx_t_5numpy_float64_t __pyx_f_4tree_33TopologicalDecisionTreeClassifie
     if (unlikely(!__Pyx_object_dict_version_matches(((PyObject *)__pyx_v_self), __pyx_tp_dict_version, __pyx_obj_dict_version))) {
       PY_UINT64_T __pyx_typedict_guard = __Pyx_get_tp_dict_version(((PyObject *)__pyx_v_self));
       #endif
-      __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_topological_impurity_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 79, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_topological_impurity_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 82, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
       if (!__Pyx_IsSameCFunction(__pyx_t_1, (void*) __pyx_pw_4tree_33TopologicalDecisionTreeClassifier_5_topological_impurity)) {
         __Pyx_INCREF(__pyx_t_1);
@@ -6602,11 +6741,11 @@ static __pyx_t_5numpy_float64_t __pyx_f_4tree_33TopologicalDecisionTreeClassifie
           PyObject *__pyx_callargs[3] = {__pyx_t_4, ((PyObject *)__pyx_v_y), ((PyObject *)__pyx_v_adj_matrix)};
           __pyx_t_2 = __Pyx_PyObject_FastCall(__pyx_t_3, __pyx_callargs+1-__pyx_t_5, 2+__pyx_t_5);
           __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
-          if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 79, __pyx_L1_error)
+          if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 82, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_2);
           __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
         }
-        __pyx_t_6 = __pyx_PyFloat_AsDouble(__pyx_t_2); if (unlikely((__pyx_t_6 == ((npy_float64)-1)) && PyErr_Occurred())) __PYX_ERR(0, 79, __pyx_L1_error)
+        __pyx_t_6 = __pyx_PyFloat_AsDouble(__pyx_t_2); if (unlikely((__pyx_t_6 == ((npy_float64)-1)) && PyErr_Occurred())) __PYX_ERR(0, 82, __pyx_L1_error)
         __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
         __pyx_r = __pyx_t_6;
         __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -6625,43 +6764,43 @@ static __pyx_t_5numpy_float64_t __pyx_f_4tree_33TopologicalDecisionTreeClassifie
     #endif
   }
 
-  /* "tree.pyx":80
+  /* "tree.pyx":83
  * 
  *     cpdef np.float64_t _topological_impurity(self, np.ndarray y, np.ndarray adj_matrix):
  *         total_samples = len(y)             # <<<<<<<<<<<<<<
  *         class_counts = np.bincount(y, minlength=self.n_classes_)
  * 
  */
-  __pyx_t_7 = PyObject_Length(((PyObject *)__pyx_v_y)); if (unlikely(__pyx_t_7 == ((Py_ssize_t)-1))) __PYX_ERR(0, 80, __pyx_L1_error)
-  __pyx_t_1 = PyInt_FromSsize_t(__pyx_t_7); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 80, __pyx_L1_error)
+  __pyx_t_7 = PyObject_Length(((PyObject *)__pyx_v_y)); if (unlikely(__pyx_t_7 == ((Py_ssize_t)-1))) __PYX_ERR(0, 83, __pyx_L1_error)
+  __pyx_t_1 = PyInt_FromSsize_t(__pyx_t_7); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 83, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_v_total_samples = __pyx_t_1;
   __pyx_t_1 = 0;
 
-  /* "tree.pyx":81
+  /* "tree.pyx":84
  *     cpdef np.float64_t _topological_impurity(self, np.ndarray y, np.ndarray adj_matrix):
  *         total_samples = len(y)
  *         class_counts = np.bincount(y, minlength=self.n_classes_)             # <<<<<<<<<<<<<<
  * 
  *         # Count edges between different classes using vectorized operation
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 81, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 84, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_bincount); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 81, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_bincount); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 84, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 81, __pyx_L1_error)
+  __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 84, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_INCREF((PyObject *)__pyx_v_y);
   __Pyx_GIVEREF((PyObject *)__pyx_v_y);
-  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_1, 0, ((PyObject *)__pyx_v_y))) __PYX_ERR(0, 81, __pyx_L1_error);
-  __pyx_t_3 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 81, __pyx_L1_error)
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_1, 0, ((PyObject *)__pyx_v_y))) __PYX_ERR(0, 84, __pyx_L1_error);
+  __pyx_t_3 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 84, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = __Pyx_PyInt_From_int(__pyx_v_self->n_classes_); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 81, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyInt_From_int(__pyx_v_self->n_classes_); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 84, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_minlength, __pyx_t_4) < 0) __PYX_ERR(0, 81, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_minlength, __pyx_t_4) < 0) __PYX_ERR(0, 84, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_1, __pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 81, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_1, __pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 84, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -6669,26 +6808,26 @@ static __pyx_t_5numpy_float64_t __pyx_f_4tree_33TopologicalDecisionTreeClassifie
   __pyx_v_class_counts = __pyx_t_4;
   __pyx_t_4 = 0;
 
-  /* "tree.pyx":84
+  /* "tree.pyx":87
  * 
  *         # Count edges between different classes using vectorized operation
  *         edges_between_classes = np.sum(adj_matrix * (y[:, None] != y[None, :])) / 2             # <<<<<<<<<<<<<<
  *         # Compute the product of class proportions
  *         class_proportions_product = np.prod(class_counts / total_samples)
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_np); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 84, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_np); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 87, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_sum); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 84, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_sum); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 87, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = __Pyx_PyObject_GetItem(((PyObject *)__pyx_v_y), __pyx_tuple__7); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 84, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_GetItem(((PyObject *)__pyx_v_y), __pyx_tuple__7); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 87, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = __Pyx_PyObject_GetItem(((PyObject *)__pyx_v_y), __pyx_tuple__8); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 84, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetItem(((PyObject *)__pyx_v_y), __pyx_tuple__8); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 87, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_8 = PyObject_RichCompare(__pyx_t_3, __pyx_t_2, Py_NE); __Pyx_XGOTREF(__pyx_t_8); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 84, __pyx_L1_error)
+  __pyx_t_8 = PyObject_RichCompare(__pyx_t_3, __pyx_t_2, Py_NE); __Pyx_XGOTREF(__pyx_t_8); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 87, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = PyNumber_Multiply(((PyObject *)__pyx_v_adj_matrix), __pyx_t_8); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 84, __pyx_L1_error)
+  __pyx_t_2 = PyNumber_Multiply(((PyObject *)__pyx_v_adj_matrix), __pyx_t_8); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 87, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
   __pyx_t_8 = NULL;
@@ -6710,29 +6849,29 @@ static __pyx_t_5numpy_float64_t __pyx_f_4tree_33TopologicalDecisionTreeClassifie
     __pyx_t_4 = __Pyx_PyObject_FastCall(__pyx_t_1, __pyx_callargs+1-__pyx_t_5, 1+__pyx_t_5);
     __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 84, __pyx_L1_error)
+    if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 87, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   }
-  __pyx_t_1 = __Pyx_PyInt_TrueDivideObjC(__pyx_t_4, __pyx_int_2, 2, 0, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 84, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyInt_TrueDivideObjC(__pyx_t_4, __pyx_int_2, 2, 0, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 87, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __pyx_v_edges_between_classes = __pyx_t_1;
   __pyx_t_1 = 0;
 
-  /* "tree.pyx":86
+  /* "tree.pyx":89
  *         edges_between_classes = np.sum(adj_matrix * (y[:, None] != y[None, :])) / 2
  *         # Compute the product of class proportions
  *         class_proportions_product = np.prod(class_counts / total_samples)             # <<<<<<<<<<<<<<
  *         # Total number of edges in the graph
  *         total_edges = adj_matrix.sum() / 2
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_np); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 86, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_np); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 89, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_prod); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 86, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_prod); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 89, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = __Pyx_PyNumber_Divide(__pyx_v_class_counts, __pyx_v_total_samples); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 86, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyNumber_Divide(__pyx_v_class_counts, __pyx_v_total_samples); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 89, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __pyx_t_8 = NULL;
   __pyx_t_5 = 0;
@@ -6753,21 +6892,21 @@ static __pyx_t_5numpy_float64_t __pyx_f_4tree_33TopologicalDecisionTreeClassifie
     __pyx_t_1 = __Pyx_PyObject_FastCall(__pyx_t_2, __pyx_callargs+1-__pyx_t_5, 1+__pyx_t_5);
     __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 86, __pyx_L1_error)
+    if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 89, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   }
   __pyx_v_class_proportions_product = __pyx_t_1;
   __pyx_t_1 = 0;
 
-  /* "tree.pyx":88
+  /* "tree.pyx":91
  *         class_proportions_product = np.prod(class_counts / total_samples)
  *         # Total number of edges in the graph
  *         total_edges = adj_matrix.sum() / 2             # <<<<<<<<<<<<<<
  * 
  *         # Avoid ZeroDivisionError
  */
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_adj_matrix), __pyx_n_s_sum); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 88, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_adj_matrix), __pyx_n_s_sum); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 91, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_t_4 = NULL;
   __pyx_t_5 = 0;
@@ -6787,38 +6926,38 @@ static __pyx_t_5numpy_float64_t __pyx_f_4tree_33TopologicalDecisionTreeClassifie
     PyObject *__pyx_callargs[2] = {__pyx_t_4, NULL};
     __pyx_t_1 = __Pyx_PyObject_FastCall(__pyx_t_2, __pyx_callargs+1-__pyx_t_5, 0+__pyx_t_5);
     __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
-    if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 88, __pyx_L1_error)
+    if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 91, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   }
-  __pyx_t_2 = __Pyx_PyInt_TrueDivideObjC(__pyx_t_1, __pyx_int_2, 2, 0, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 88, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyInt_TrueDivideObjC(__pyx_t_1, __pyx_int_2, 2, 0, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 91, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_v_total_edges = __pyx_t_2;
   __pyx_t_2 = 0;
 
-  /* "tree.pyx":91
+  /* "tree.pyx":94
  * 
  *         # Avoid ZeroDivisionError
  *         if total_edges == 0:             # <<<<<<<<<<<<<<
  *             return class_proportions_product
  * 
  */
-  __pyx_t_9 = (__Pyx_PyInt_BoolEqObjC(__pyx_v_total_edges, __pyx_int_0, 0, 0)); if (unlikely((__pyx_t_9 < 0))) __PYX_ERR(0, 91, __pyx_L1_error)
+  __pyx_t_9 = (__Pyx_PyInt_BoolEqObjC(__pyx_v_total_edges, __pyx_int_0, 0, 0)); if (unlikely((__pyx_t_9 < 0))) __PYX_ERR(0, 94, __pyx_L1_error)
   if (__pyx_t_9) {
 
-    /* "tree.pyx":92
+    /* "tree.pyx":95
  *         # Avoid ZeroDivisionError
  *         if total_edges == 0:
  *             return class_proportions_product             # <<<<<<<<<<<<<<
  * 
  *         # Compute the topological impurity
  */
-    __pyx_t_6 = __pyx_PyFloat_AsDouble(__pyx_v_class_proportions_product); if (unlikely((__pyx_t_6 == ((npy_float64)-1)) && PyErr_Occurred())) __PYX_ERR(0, 92, __pyx_L1_error)
+    __pyx_t_6 = __pyx_PyFloat_AsDouble(__pyx_v_class_proportions_product); if (unlikely((__pyx_t_6 == ((npy_float64)-1)) && PyErr_Occurred())) __PYX_ERR(0, 95, __pyx_L1_error)
     __pyx_r = __pyx_t_6;
     goto __pyx_L0;
 
-    /* "tree.pyx":91
+    /* "tree.pyx":94
  * 
  *         # Avoid ZeroDivisionError
  *         if total_edges == 0:             # <<<<<<<<<<<<<<
@@ -6827,36 +6966,36 @@ static __pyx_t_5numpy_float64_t __pyx_f_4tree_33TopologicalDecisionTreeClassifie
  */
   }
 
-  /* "tree.pyx":95
+  /* "tree.pyx":98
  * 
  *         # Compute the topological impurity
  *         topological_impurity = class_proportions_product * (1 + edges_between_classes / total_edges)             # <<<<<<<<<<<<<<
  *         return topological_impurity
  * 
  */
-  __pyx_t_2 = __Pyx_PyNumber_Divide(__pyx_v_edges_between_classes, __pyx_v_total_edges); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 95, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyNumber_Divide(__pyx_v_edges_between_classes, __pyx_v_total_edges); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 98, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_1 = __Pyx_PyInt_AddCObj(__pyx_int_1, __pyx_t_2, 1, 0, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 95, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyInt_AddCObj(__pyx_int_1, __pyx_t_2, 1, 0, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 98, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = PyNumber_Multiply(__pyx_v_class_proportions_product, __pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 95, __pyx_L1_error)
+  __pyx_t_2 = PyNumber_Multiply(__pyx_v_class_proportions_product, __pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 98, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_v_topological_impurity = __pyx_t_2;
   __pyx_t_2 = 0;
 
-  /* "tree.pyx":96
+  /* "tree.pyx":99
  *         # Compute the topological impurity
  *         topological_impurity = class_proportions_product * (1 + edges_between_classes / total_edges)
  *         return topological_impurity             # <<<<<<<<<<<<<<
  * 
  *     cpdef _find_best_split(self, np.ndarray X, np.ndarray y, np.ndarray adj_matrix):
  */
-  __pyx_t_6 = __pyx_PyFloat_AsDouble(__pyx_v_topological_impurity); if (unlikely((__pyx_t_6 == ((npy_float64)-1)) && PyErr_Occurred())) __PYX_ERR(0, 96, __pyx_L1_error)
+  __pyx_t_6 = __pyx_PyFloat_AsDouble(__pyx_v_topological_impurity); if (unlikely((__pyx_t_6 == ((npy_float64)-1)) && PyErr_Occurred())) __PYX_ERR(0, 99, __pyx_L1_error)
   __pyx_r = __pyx_t_6;
   goto __pyx_L0;
 
-  /* "tree.pyx":79
+  /* "tree.pyx":82
  *         return {"leaf": True, "class": majority_class}
  * 
  *     cpdef np.float64_t _topological_impurity(self, np.ndarray y, np.ndarray adj_matrix):             # <<<<<<<<<<<<<<
@@ -6940,7 +7079,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[0]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 79, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 82, __pyx_L3_error)
         else goto __pyx_L5_argtuple_error;
         CYTHON_FALLTHROUGH;
         case  1:
@@ -6948,14 +7087,14 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[1]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 79, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 82, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("_topological_impurity", 1, 2, 2, 1); __PYX_ERR(0, 79, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("_topological_impurity", 1, 2, 2, 1); __PYX_ERR(0, 82, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
         const Py_ssize_t kwd_pos_args = __pyx_nargs;
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "_topological_impurity") < 0)) __PYX_ERR(0, 79, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "_topological_impurity") < 0)) __PYX_ERR(0, 82, __pyx_L3_error)
       }
     } else if (unlikely(__pyx_nargs != 2)) {
       goto __pyx_L5_argtuple_error;
@@ -6968,7 +7107,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   }
   goto __pyx_L6_skip;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("_topological_impurity", 1, 2, 2, __pyx_nargs); __PYX_ERR(0, 79, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("_topological_impurity", 1, 2, 2, __pyx_nargs); __PYX_ERR(0, 82, __pyx_L3_error)
   __pyx_L6_skip:;
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -6982,8 +7121,8 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_y), __pyx_ptype_5numpy_ndarray, 1, "y", 0))) __PYX_ERR(0, 79, __pyx_L1_error)
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_adj_matrix), __pyx_ptype_5numpy_ndarray, 1, "adj_matrix", 0))) __PYX_ERR(0, 79, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_y), __pyx_ptype_5numpy_ndarray, 1, "y", 0))) __PYX_ERR(0, 82, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_adj_matrix), __pyx_ptype_5numpy_ndarray, 1, "adj_matrix", 0))) __PYX_ERR(0, 82, __pyx_L1_error)
   __pyx_r = __pyx_pf_4tree_33TopologicalDecisionTreeClassifier_4_topological_impurity(((struct __pyx_obj_4tree_TopologicalDecisionTreeClassifier *)__pyx_v_self), __pyx_v_y, __pyx_v_adj_matrix);
 
   /* function exit code */
@@ -7011,8 +7150,8 @@ static PyObject *__pyx_pf_4tree_33TopologicalDecisionTreeClassifier_4_topologica
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("_topological_impurity", 1);
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __pyx_f_4tree_33TopologicalDecisionTreeClassifier__topological_impurity(__pyx_v_self, __pyx_v_y, __pyx_v_adj_matrix, 1); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 79, __pyx_L1_error)
-  __pyx_t_2 = PyFloat_FromDouble(__pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 79, __pyx_L1_error)
+  __pyx_t_1 = __pyx_f_4tree_33TopologicalDecisionTreeClassifier__topological_impurity(__pyx_v_self, __pyx_v_y, __pyx_v_adj_matrix, 1); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 82, __pyx_L1_error)
+  __pyx_t_2 = PyFloat_FromDouble(__pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 82, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_r = __pyx_t_2;
   __pyx_t_2 = 0;
@@ -7029,7 +7168,7 @@ static PyObject *__pyx_pf_4tree_33TopologicalDecisionTreeClassifier_4_topologica
   return __pyx_r;
 }
 
-/* "tree.pyx":98
+/* "tree.pyx":101
  *         return topological_impurity
  * 
  *     cpdef _find_best_split(self, np.ndarray X, np.ndarray y, np.ndarray adj_matrix):             # <<<<<<<<<<<<<<
@@ -7090,7 +7229,7 @@ static PyObject *__pyx_f_4tree_33TopologicalDecisionTreeClassifier__find_best_sp
     if (unlikely(!__Pyx_object_dict_version_matches(((PyObject *)__pyx_v_self), __pyx_tp_dict_version, __pyx_obj_dict_version))) {
       PY_UINT64_T __pyx_typedict_guard = __Pyx_get_tp_dict_version(((PyObject *)__pyx_v_self));
       #endif
-      __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_find_best_split); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 98, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_find_best_split); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 101, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
       if (!__Pyx_IsSameCFunction(__pyx_t_1, (void*) __pyx_pw_4tree_33TopologicalDecisionTreeClassifier_7_find_best_split)) {
         __Pyx_XDECREF(__pyx_r);
@@ -7113,7 +7252,7 @@ static PyObject *__pyx_f_4tree_33TopologicalDecisionTreeClassifier__find_best_sp
           PyObject *__pyx_callargs[4] = {__pyx_t_4, ((PyObject *)__pyx_v_X), ((PyObject *)__pyx_v_y), ((PyObject *)__pyx_v_adj_matrix)};
           __pyx_t_2 = __Pyx_PyObject_FastCall(__pyx_t_3, __pyx_callargs+1-__pyx_t_5, 3+__pyx_t_5);
           __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
-          if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 98, __pyx_L1_error)
+          if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 101, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_2);
           __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
         }
@@ -7135,20 +7274,20 @@ static PyObject *__pyx_f_4tree_33TopologicalDecisionTreeClassifier__find_best_sp
     #endif
   }
 
-  /* "tree.pyx":99
+  /* "tree.pyx":102
  * 
  *     cpdef _find_best_split(self, np.ndarray X, np.ndarray y, np.ndarray adj_matrix):
  *         best_impurity_reduction = float("-inf")             # <<<<<<<<<<<<<<
  *         best_split_feature: int|None = None
  *         best_split_value: float|None = None
  */
-  __pyx_t_6 = __Pyx_PyUnicode_AsDouble(__pyx_kp_u_inf); if (unlikely(__pyx_t_6 == ((double)((double)-1)) && PyErr_Occurred())) __PYX_ERR(0, 99, __pyx_L1_error)
-  __pyx_t_1 = PyFloat_FromDouble(__pyx_t_6); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 99, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyUnicode_AsDouble(__pyx_kp_u_inf); if (unlikely(__pyx_t_6 == ((double)((double)-1)) && PyErr_Occurred())) __PYX_ERR(0, 102, __pyx_L1_error)
+  __pyx_t_1 = PyFloat_FromDouble(__pyx_t_6); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 102, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_v_best_impurity_reduction = __pyx_t_1;
   __pyx_t_1 = 0;
 
-  /* "tree.pyx":100
+  /* "tree.pyx":103
  *     cpdef _find_best_split(self, np.ndarray X, np.ndarray y, np.ndarray adj_matrix):
  *         best_impurity_reduction = float("-inf")
  *         best_split_feature: int|None = None             # <<<<<<<<<<<<<<
@@ -7158,7 +7297,7 @@ static PyObject *__pyx_f_4tree_33TopologicalDecisionTreeClassifier__find_best_sp
   __Pyx_INCREF(Py_None);
   __pyx_v_best_split_feature = Py_None;
 
-  /* "tree.pyx":101
+  /* "tree.pyx":104
  *         best_impurity_reduction = float("-inf")
  *         best_split_feature: int|None = None
  *         best_split_value: float|None = None             # <<<<<<<<<<<<<<
@@ -7168,55 +7307,55 @@ static PyObject *__pyx_f_4tree_33TopologicalDecisionTreeClassifier__find_best_sp
   __Pyx_INCREF(Py_None);
   __pyx_v_best_split_value = Py_None;
 
-  /* "tree.pyx":102
+  /* "tree.pyx":105
  *         best_split_feature: int|None = None
  *         best_split_value: float|None = None
  *         parent_impurity = self._topological_impurity(y, adj_matrix)             # <<<<<<<<<<<<<<
  * 
  *         for feature in range(X.shape[1]):
  */
-  __pyx_t_7 = ((struct __pyx_vtabstruct_4tree_TopologicalDecisionTreeClassifier *)__pyx_v_self->__pyx_vtab)->_topological_impurity(__pyx_v_self, __pyx_v_y, __pyx_v_adj_matrix, 0); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 102, __pyx_L1_error)
-  __pyx_t_1 = PyFloat_FromDouble(__pyx_t_7); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 102, __pyx_L1_error)
+  __pyx_t_7 = ((struct __pyx_vtabstruct_4tree_TopologicalDecisionTreeClassifier *)__pyx_v_self->__pyx_vtab)->_topological_impurity(__pyx_v_self, __pyx_v_y, __pyx_v_adj_matrix, 0); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 105, __pyx_L1_error)
+  __pyx_t_1 = PyFloat_FromDouble(__pyx_t_7); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 105, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_v_parent_impurity = __pyx_t_1;
   __pyx_t_1 = 0;
 
-  /* "tree.pyx":104
+  /* "tree.pyx":107
  *         parent_impurity = self._topological_impurity(y, adj_matrix)
  * 
  *         for feature in range(X.shape[1]):             # <<<<<<<<<<<<<<
  *             unique_values = np.unique(X[:, feature])
  *             if len(unique_values) < 2:
  */
-  __pyx_t_8 = __pyx_f_5numpy_7ndarray_5shape_shape(__pyx_v_X); if (unlikely(__pyx_t_8 == ((npy_intp *)NULL) && PyErr_Occurred())) __PYX_ERR(0, 104, __pyx_L1_error)
+  __pyx_t_8 = __pyx_f_5numpy_7ndarray_5shape_shape(__pyx_v_X); if (unlikely(__pyx_t_8 == ((npy_intp *)NULL) && PyErr_Occurred())) __PYX_ERR(0, 107, __pyx_L1_error)
   __pyx_t_9 = (__pyx_t_8[1]);
   __pyx_t_10 = __pyx_t_9;
   for (__pyx_t_11 = 0; __pyx_t_11 < __pyx_t_10; __pyx_t_11+=1) {
     __pyx_v_feature = __pyx_t_11;
 
-    /* "tree.pyx":105
+    /* "tree.pyx":108
  * 
  *         for feature in range(X.shape[1]):
  *             unique_values = np.unique(X[:, feature])             # <<<<<<<<<<<<<<
  *             if len(unique_values) < 2:
  *                 continue
  */
-    __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 105, __pyx_L1_error)
+    __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 108, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_unique); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 105, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_unique); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 108, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    __pyx_t_2 = __Pyx_PyInt_From_Py_intptr_t(__pyx_v_feature); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 105, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyInt_From_Py_intptr_t(__pyx_v_feature); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 108, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_4 = PyTuple_New(2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 105, __pyx_L1_error)
+    __pyx_t_4 = PyTuple_New(2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 108, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_INCREF(__pyx_slice__6);
     __Pyx_GIVEREF(__pyx_slice__6);
-    if (__Pyx_PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_slice__6)) __PYX_ERR(0, 105, __pyx_L1_error);
+    if (__Pyx_PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_slice__6)) __PYX_ERR(0, 108, __pyx_L1_error);
     __Pyx_GIVEREF(__pyx_t_2);
-    if (__Pyx_PyTuple_SET_ITEM(__pyx_t_4, 1, __pyx_t_2)) __PYX_ERR(0, 105, __pyx_L1_error);
+    if (__Pyx_PyTuple_SET_ITEM(__pyx_t_4, 1, __pyx_t_2)) __PYX_ERR(0, 108, __pyx_L1_error);
     __pyx_t_2 = 0;
-    __pyx_t_2 = __Pyx_PyObject_GetItem(((PyObject *)__pyx_v_X), __pyx_t_4); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 105, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyObject_GetItem(((PyObject *)__pyx_v_X), __pyx_t_4); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 108, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     __pyx_t_4 = NULL;
@@ -7238,25 +7377,25 @@ static PyObject *__pyx_f_4tree_33TopologicalDecisionTreeClassifier__find_best_sp
       __pyx_t_1 = __Pyx_PyObject_FastCall(__pyx_t_3, __pyx_callargs+1-__pyx_t_5, 1+__pyx_t_5);
       __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-      if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 105, __pyx_L1_error)
+      if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 108, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     }
     __Pyx_XDECREF_SET(__pyx_v_unique_values, __pyx_t_1);
     __pyx_t_1 = 0;
 
-    /* "tree.pyx":106
+    /* "tree.pyx":109
  *         for feature in range(X.shape[1]):
  *             unique_values = np.unique(X[:, feature])
  *             if len(unique_values) < 2:             # <<<<<<<<<<<<<<
  *                 continue
  * 
  */
-    __pyx_t_12 = PyObject_Length(__pyx_v_unique_values); if (unlikely(__pyx_t_12 == ((Py_ssize_t)-1))) __PYX_ERR(0, 106, __pyx_L1_error)
+    __pyx_t_12 = PyObject_Length(__pyx_v_unique_values); if (unlikely(__pyx_t_12 == ((Py_ssize_t)-1))) __PYX_ERR(0, 109, __pyx_L1_error)
     __pyx_t_13 = (__pyx_t_12 < 2);
     if (__pyx_t_13) {
 
-      /* "tree.pyx":107
+      /* "tree.pyx":110
  *             unique_values = np.unique(X[:, feature])
  *             if len(unique_values) < 2:
  *                 continue             # <<<<<<<<<<<<<<
@@ -7265,7 +7404,7 @@ static PyObject *__pyx_f_4tree_33TopologicalDecisionTreeClassifier__find_best_sp
  */
       goto __pyx_L3_continue;
 
-      /* "tree.pyx":106
+      /* "tree.pyx":109
  *         for feature in range(X.shape[1]):
  *             unique_values = np.unique(X[:, feature])
  *             if len(unique_values) < 2:             # <<<<<<<<<<<<<<
@@ -7274,7 +7413,7 @@ static PyObject *__pyx_f_4tree_33TopologicalDecisionTreeClassifier__find_best_sp
  */
     }
 
-    /* "tree.pyx":109
+    /* "tree.pyx":112
  *                 continue
  * 
  *             for split_value in unique_values:             # <<<<<<<<<<<<<<
@@ -7286,9 +7425,9 @@ static PyObject *__pyx_f_4tree_33TopologicalDecisionTreeClassifier__find_best_sp
       __pyx_t_12 = 0;
       __pyx_t_14 = NULL;
     } else {
-      __pyx_t_12 = -1; __pyx_t_1 = PyObject_GetIter(__pyx_v_unique_values); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 109, __pyx_L1_error)
+      __pyx_t_12 = -1; __pyx_t_1 = PyObject_GetIter(__pyx_v_unique_values); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 112, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
-      __pyx_t_14 = __Pyx_PyObject_GetIterNextFunc(__pyx_t_1); if (unlikely(!__pyx_t_14)) __PYX_ERR(0, 109, __pyx_L1_error)
+      __pyx_t_14 = __Pyx_PyObject_GetIterNextFunc(__pyx_t_1); if (unlikely(!__pyx_t_14)) __PYX_ERR(0, 112, __pyx_L1_error)
     }
     for (;;) {
       if (likely(!__pyx_t_14)) {
@@ -7296,28 +7435,28 @@ static PyObject *__pyx_f_4tree_33TopologicalDecisionTreeClassifier__find_best_sp
           {
             Py_ssize_t __pyx_temp = __Pyx_PyList_GET_SIZE(__pyx_t_1);
             #if !CYTHON_ASSUME_SAFE_MACROS
-            if (unlikely((__pyx_temp < 0))) __PYX_ERR(0, 109, __pyx_L1_error)
+            if (unlikely((__pyx_temp < 0))) __PYX_ERR(0, 112, __pyx_L1_error)
             #endif
             if (__pyx_t_12 >= __pyx_temp) break;
           }
           #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-          __pyx_t_3 = PyList_GET_ITEM(__pyx_t_1, __pyx_t_12); __Pyx_INCREF(__pyx_t_3); __pyx_t_12++; if (unlikely((0 < 0))) __PYX_ERR(0, 109, __pyx_L1_error)
+          __pyx_t_3 = PyList_GET_ITEM(__pyx_t_1, __pyx_t_12); __Pyx_INCREF(__pyx_t_3); __pyx_t_12++; if (unlikely((0 < 0))) __PYX_ERR(0, 112, __pyx_L1_error)
           #else
-          __pyx_t_3 = __Pyx_PySequence_ITEM(__pyx_t_1, __pyx_t_12); __pyx_t_12++; if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 109, __pyx_L1_error)
+          __pyx_t_3 = __Pyx_PySequence_ITEM(__pyx_t_1, __pyx_t_12); __pyx_t_12++; if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 112, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_3);
           #endif
         } else {
           {
             Py_ssize_t __pyx_temp = __Pyx_PyTuple_GET_SIZE(__pyx_t_1);
             #if !CYTHON_ASSUME_SAFE_MACROS
-            if (unlikely((__pyx_temp < 0))) __PYX_ERR(0, 109, __pyx_L1_error)
+            if (unlikely((__pyx_temp < 0))) __PYX_ERR(0, 112, __pyx_L1_error)
             #endif
             if (__pyx_t_12 >= __pyx_temp) break;
           }
           #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-          __pyx_t_3 = PyTuple_GET_ITEM(__pyx_t_1, __pyx_t_12); __Pyx_INCREF(__pyx_t_3); __pyx_t_12++; if (unlikely((0 < 0))) __PYX_ERR(0, 109, __pyx_L1_error)
+          __pyx_t_3 = PyTuple_GET_ITEM(__pyx_t_1, __pyx_t_12); __Pyx_INCREF(__pyx_t_3); __pyx_t_12++; if (unlikely((0 < 0))) __PYX_ERR(0, 112, __pyx_L1_error)
           #else
-          __pyx_t_3 = __Pyx_PySequence_ITEM(__pyx_t_1, __pyx_t_12); __pyx_t_12++; if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 109, __pyx_L1_error)
+          __pyx_t_3 = __Pyx_PySequence_ITEM(__pyx_t_1, __pyx_t_12); __pyx_t_12++; if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 112, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_3);
           #endif
         }
@@ -7327,7 +7466,7 @@ static PyObject *__pyx_f_4tree_33TopologicalDecisionTreeClassifier__find_best_sp
           PyObject* exc_type = PyErr_Occurred();
           if (exc_type) {
             if (likely(__Pyx_PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
-            else __PYX_ERR(0, 109, __pyx_L1_error)
+            else __PYX_ERR(0, 112, __pyx_L1_error)
           }
           break;
         }
@@ -7336,51 +7475,51 @@ static PyObject *__pyx_f_4tree_33TopologicalDecisionTreeClassifier__find_best_sp
       __Pyx_XDECREF_SET(__pyx_v_split_value, __pyx_t_3);
       __pyx_t_3 = 0;
 
-      /* "tree.pyx":110
+      /* "tree.pyx":113
  * 
  *             for split_value in unique_values:
  *                 left_indices = X[:, feature] <= split_value             # <<<<<<<<<<<<<<
  *                 right_indices = ~left_indices
  * 
  */
-      __pyx_t_3 = __Pyx_PyInt_From_Py_intptr_t(__pyx_v_feature); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 110, __pyx_L1_error)
+      __pyx_t_3 = __Pyx_PyInt_From_Py_intptr_t(__pyx_v_feature); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 113, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
-      __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 110, __pyx_L1_error)
+      __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 113, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_2);
       __Pyx_INCREF(__pyx_slice__6);
       __Pyx_GIVEREF(__pyx_slice__6);
-      if (__Pyx_PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_slice__6)) __PYX_ERR(0, 110, __pyx_L1_error);
+      if (__Pyx_PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_slice__6)) __PYX_ERR(0, 113, __pyx_L1_error);
       __Pyx_GIVEREF(__pyx_t_3);
-      if (__Pyx_PyTuple_SET_ITEM(__pyx_t_2, 1, __pyx_t_3)) __PYX_ERR(0, 110, __pyx_L1_error);
+      if (__Pyx_PyTuple_SET_ITEM(__pyx_t_2, 1, __pyx_t_3)) __PYX_ERR(0, 113, __pyx_L1_error);
       __pyx_t_3 = 0;
-      __pyx_t_3 = __Pyx_PyObject_GetItem(((PyObject *)__pyx_v_X), __pyx_t_2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 110, __pyx_L1_error)
+      __pyx_t_3 = __Pyx_PyObject_GetItem(((PyObject *)__pyx_v_X), __pyx_t_2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 113, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-      __pyx_t_2 = PyObject_RichCompare(__pyx_t_3, __pyx_v_split_value, Py_LE); __Pyx_XGOTREF(__pyx_t_2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 110, __pyx_L1_error)
+      __pyx_t_2 = PyObject_RichCompare(__pyx_t_3, __pyx_v_split_value, Py_LE); __Pyx_XGOTREF(__pyx_t_2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 113, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
       __Pyx_XDECREF_SET(__pyx_v_left_indices, __pyx_t_2);
       __pyx_t_2 = 0;
 
-      /* "tree.pyx":111
+      /* "tree.pyx":114
  *             for split_value in unique_values:
  *                 left_indices = X[:, feature] <= split_value
  *                 right_indices = ~left_indices             # <<<<<<<<<<<<<<
  * 
  *                 if (left_indices.sum() < self.min_samples_leaf or
  */
-      __pyx_t_2 = PyNumber_Invert(__pyx_v_left_indices); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 111, __pyx_L1_error)
+      __pyx_t_2 = PyNumber_Invert(__pyx_v_left_indices); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 114, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_2);
       __Pyx_XDECREF_SET(__pyx_v_right_indices, __pyx_t_2);
       __pyx_t_2 = 0;
 
-      /* "tree.pyx":113
+      /* "tree.pyx":116
  *                 right_indices = ~left_indices
  * 
  *                 if (left_indices.sum() < self.min_samples_leaf or             # <<<<<<<<<<<<<<
  *                     right_indices.sum() < self.min_samples_leaf):
  *                     continue
  */
-      __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_left_indices, __pyx_n_s_sum); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 113, __pyx_L1_error)
+      __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_left_indices, __pyx_n_s_sum); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 116, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
       __pyx_t_4 = NULL;
       __pyx_t_5 = 0;
@@ -7400,16 +7539,16 @@ static PyObject *__pyx_f_4tree_33TopologicalDecisionTreeClassifier__find_best_sp
         PyObject *__pyx_callargs[2] = {__pyx_t_4, NULL};
         __pyx_t_2 = __Pyx_PyObject_FastCall(__pyx_t_3, __pyx_callargs+1-__pyx_t_5, 0+__pyx_t_5);
         __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
-        if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 113, __pyx_L1_error)
+        if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 116, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_2);
         __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
       }
-      __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_v_self->min_samples_leaf); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 113, __pyx_L1_error)
+      __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_v_self->min_samples_leaf); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 116, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
-      __pyx_t_4 = PyObject_RichCompare(__pyx_t_2, __pyx_t_3, Py_LT); __Pyx_XGOTREF(__pyx_t_4); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 113, __pyx_L1_error)
+      __pyx_t_4 = PyObject_RichCompare(__pyx_t_2, __pyx_t_3, Py_LT); __Pyx_XGOTREF(__pyx_t_4); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 116, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-      __pyx_t_15 = __Pyx_PyObject_IsTrue(__pyx_t_4); if (unlikely((__pyx_t_15 < 0))) __PYX_ERR(0, 113, __pyx_L1_error)
+      __pyx_t_15 = __Pyx_PyObject_IsTrue(__pyx_t_4); if (unlikely((__pyx_t_15 < 0))) __PYX_ERR(0, 116, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
       if (!__pyx_t_15) {
       } else {
@@ -7417,14 +7556,14 @@ static PyObject *__pyx_f_4tree_33TopologicalDecisionTreeClassifier__find_best_sp
         goto __pyx_L9_bool_binop_done;
       }
 
-      /* "tree.pyx":114
+      /* "tree.pyx":117
  * 
  *                 if (left_indices.sum() < self.min_samples_leaf or
  *                     right_indices.sum() < self.min_samples_leaf):             # <<<<<<<<<<<<<<
  *                     continue
  * 
  */
-      __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_right_indices, __pyx_n_s_sum); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 114, __pyx_L1_error)
+      __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_right_indices, __pyx_n_s_sum); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 117, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
       __pyx_t_2 = NULL;
       __pyx_t_5 = 0;
@@ -7444,21 +7583,21 @@ static PyObject *__pyx_f_4tree_33TopologicalDecisionTreeClassifier__find_best_sp
         PyObject *__pyx_callargs[2] = {__pyx_t_2, NULL};
         __pyx_t_4 = __Pyx_PyObject_FastCall(__pyx_t_3, __pyx_callargs+1-__pyx_t_5, 0+__pyx_t_5);
         __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
-        if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 114, __pyx_L1_error)
+        if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 117, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_4);
         __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
       }
-      __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_v_self->min_samples_leaf); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 114, __pyx_L1_error)
+      __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_v_self->min_samples_leaf); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 117, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
-      __pyx_t_2 = PyObject_RichCompare(__pyx_t_4, __pyx_t_3, Py_LT); __Pyx_XGOTREF(__pyx_t_2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 114, __pyx_L1_error)
+      __pyx_t_2 = PyObject_RichCompare(__pyx_t_4, __pyx_t_3, Py_LT); __Pyx_XGOTREF(__pyx_t_2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 117, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-      __pyx_t_15 = __Pyx_PyObject_IsTrue(__pyx_t_2); if (unlikely((__pyx_t_15 < 0))) __PYX_ERR(0, 114, __pyx_L1_error)
+      __pyx_t_15 = __Pyx_PyObject_IsTrue(__pyx_t_2); if (unlikely((__pyx_t_15 < 0))) __PYX_ERR(0, 117, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
       __pyx_t_13 = __pyx_t_15;
       __pyx_L9_bool_binop_done:;
 
-      /* "tree.pyx":113
+      /* "tree.pyx":116
  *                 right_indices = ~left_indices
  * 
  *                 if (left_indices.sum() < self.min_samples_leaf or             # <<<<<<<<<<<<<<
@@ -7467,7 +7606,7 @@ static PyObject *__pyx_f_4tree_33TopologicalDecisionTreeClassifier__find_best_sp
  */
       if (__pyx_t_13) {
 
-        /* "tree.pyx":115
+        /* "tree.pyx":118
  *                 if (left_indices.sum() < self.min_samples_leaf or
  *                     right_indices.sum() < self.min_samples_leaf):
  *                     continue             # <<<<<<<<<<<<<<
@@ -7476,7 +7615,7 @@ static PyObject *__pyx_f_4tree_33TopologicalDecisionTreeClassifier__find_best_sp
  */
         goto __pyx_L6_continue;
 
-        /* "tree.pyx":113
+        /* "tree.pyx":116
  *                 right_indices = ~left_indices
  * 
  *                 if (left_indices.sum() < self.min_samples_leaf or             # <<<<<<<<<<<<<<
@@ -7485,80 +7624,80 @@ static PyObject *__pyx_f_4tree_33TopologicalDecisionTreeClassifier__find_best_sp
  */
       }
 
-      /* "tree.pyx":117
+      /* "tree.pyx":120
  *                     continue
  * 
  *                 left_impurity = self._topological_impurity(y[left_indices], adj_matrix[left_indices][:, left_indices])             # <<<<<<<<<<<<<<
  *                 right_impurity = self._topological_impurity(y[right_indices], adj_matrix[right_indices][:, right_indices])
  * 
  */
-      __pyx_t_2 = __Pyx_PyObject_GetItem(((PyObject *)__pyx_v_y), __pyx_v_left_indices); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 117, __pyx_L1_error)
+      __pyx_t_2 = __Pyx_PyObject_GetItem(((PyObject *)__pyx_v_y), __pyx_v_left_indices); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 120, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_2);
-      if (!(likely(((__pyx_t_2) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_2, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 117, __pyx_L1_error)
-      __pyx_t_3 = __Pyx_PyObject_GetItem(((PyObject *)__pyx_v_adj_matrix), __pyx_v_left_indices); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 117, __pyx_L1_error)
+      if (!(likely(((__pyx_t_2) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_2, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 120, __pyx_L1_error)
+      __pyx_t_3 = __Pyx_PyObject_GetItem(((PyObject *)__pyx_v_adj_matrix), __pyx_v_left_indices); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 120, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
-      __pyx_t_4 = PyTuple_New(2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 117, __pyx_L1_error)
+      __pyx_t_4 = PyTuple_New(2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 120, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_INCREF(__pyx_slice__6);
       __Pyx_GIVEREF(__pyx_slice__6);
-      if (__Pyx_PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_slice__6)) __PYX_ERR(0, 117, __pyx_L1_error);
+      if (__Pyx_PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_slice__6)) __PYX_ERR(0, 120, __pyx_L1_error);
       __Pyx_INCREF(__pyx_v_left_indices);
       __Pyx_GIVEREF(__pyx_v_left_indices);
-      if (__Pyx_PyTuple_SET_ITEM(__pyx_t_4, 1, __pyx_v_left_indices)) __PYX_ERR(0, 117, __pyx_L1_error);
-      __pyx_t_16 = __Pyx_PyObject_GetItem(__pyx_t_3, __pyx_t_4); if (unlikely(!__pyx_t_16)) __PYX_ERR(0, 117, __pyx_L1_error)
+      if (__Pyx_PyTuple_SET_ITEM(__pyx_t_4, 1, __pyx_v_left_indices)) __PYX_ERR(0, 120, __pyx_L1_error);
+      __pyx_t_16 = __Pyx_PyObject_GetItem(__pyx_t_3, __pyx_t_4); if (unlikely(!__pyx_t_16)) __PYX_ERR(0, 120, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_16);
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-      if (!(likely(((__pyx_t_16) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_16, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 117, __pyx_L1_error)
-      __pyx_t_7 = ((struct __pyx_vtabstruct_4tree_TopologicalDecisionTreeClassifier *)__pyx_v_self->__pyx_vtab)->_topological_impurity(__pyx_v_self, ((PyArrayObject *)__pyx_t_2), ((PyArrayObject *)__pyx_t_16), 0); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 117, __pyx_L1_error)
+      if (!(likely(((__pyx_t_16) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_16, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 120, __pyx_L1_error)
+      __pyx_t_7 = ((struct __pyx_vtabstruct_4tree_TopologicalDecisionTreeClassifier *)__pyx_v_self->__pyx_vtab)->_topological_impurity(__pyx_v_self, ((PyArrayObject *)__pyx_t_2), ((PyArrayObject *)__pyx_t_16), 0); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 120, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
       __Pyx_DECREF(__pyx_t_16); __pyx_t_16 = 0;
-      __pyx_t_16 = PyFloat_FromDouble(__pyx_t_7); if (unlikely(!__pyx_t_16)) __PYX_ERR(0, 117, __pyx_L1_error)
+      __pyx_t_16 = PyFloat_FromDouble(__pyx_t_7); if (unlikely(!__pyx_t_16)) __PYX_ERR(0, 120, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_16);
       __Pyx_XDECREF_SET(__pyx_v_left_impurity, __pyx_t_16);
       __pyx_t_16 = 0;
 
-      /* "tree.pyx":118
+      /* "tree.pyx":121
  * 
  *                 left_impurity = self._topological_impurity(y[left_indices], adj_matrix[left_indices][:, left_indices])
  *                 right_impurity = self._topological_impurity(y[right_indices], adj_matrix[right_indices][:, right_indices])             # <<<<<<<<<<<<<<
  * 
  *                 child_impurity = left_indices.sum() / len(y) * left_impurity + right_indices.sum() / len(y) * right_impurity
  */
-      __pyx_t_16 = __Pyx_PyObject_GetItem(((PyObject *)__pyx_v_y), __pyx_v_right_indices); if (unlikely(!__pyx_t_16)) __PYX_ERR(0, 118, __pyx_L1_error)
+      __pyx_t_16 = __Pyx_PyObject_GetItem(((PyObject *)__pyx_v_y), __pyx_v_right_indices); if (unlikely(!__pyx_t_16)) __PYX_ERR(0, 121, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_16);
-      if (!(likely(((__pyx_t_16) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_16, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 118, __pyx_L1_error)
-      __pyx_t_2 = __Pyx_PyObject_GetItem(((PyObject *)__pyx_v_adj_matrix), __pyx_v_right_indices); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 118, __pyx_L1_error)
+      if (!(likely(((__pyx_t_16) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_16, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 121, __pyx_L1_error)
+      __pyx_t_2 = __Pyx_PyObject_GetItem(((PyObject *)__pyx_v_adj_matrix), __pyx_v_right_indices); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 121, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_2);
-      __pyx_t_4 = PyTuple_New(2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 118, __pyx_L1_error)
+      __pyx_t_4 = PyTuple_New(2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 121, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_INCREF(__pyx_slice__6);
       __Pyx_GIVEREF(__pyx_slice__6);
-      if (__Pyx_PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_slice__6)) __PYX_ERR(0, 118, __pyx_L1_error);
+      if (__Pyx_PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_slice__6)) __PYX_ERR(0, 121, __pyx_L1_error);
       __Pyx_INCREF(__pyx_v_right_indices);
       __Pyx_GIVEREF(__pyx_v_right_indices);
-      if (__Pyx_PyTuple_SET_ITEM(__pyx_t_4, 1, __pyx_v_right_indices)) __PYX_ERR(0, 118, __pyx_L1_error);
-      __pyx_t_3 = __Pyx_PyObject_GetItem(__pyx_t_2, __pyx_t_4); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 118, __pyx_L1_error)
+      if (__Pyx_PyTuple_SET_ITEM(__pyx_t_4, 1, __pyx_v_right_indices)) __PYX_ERR(0, 121, __pyx_L1_error);
+      __pyx_t_3 = __Pyx_PyObject_GetItem(__pyx_t_2, __pyx_t_4); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 121, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-      if (!(likely(((__pyx_t_3) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_3, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 118, __pyx_L1_error)
-      __pyx_t_7 = ((struct __pyx_vtabstruct_4tree_TopologicalDecisionTreeClassifier *)__pyx_v_self->__pyx_vtab)->_topological_impurity(__pyx_v_self, ((PyArrayObject *)__pyx_t_16), ((PyArrayObject *)__pyx_t_3), 0); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 118, __pyx_L1_error)
+      if (!(likely(((__pyx_t_3) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_3, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 121, __pyx_L1_error)
+      __pyx_t_7 = ((struct __pyx_vtabstruct_4tree_TopologicalDecisionTreeClassifier *)__pyx_v_self->__pyx_vtab)->_topological_impurity(__pyx_v_self, ((PyArrayObject *)__pyx_t_16), ((PyArrayObject *)__pyx_t_3), 0); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 121, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_16); __pyx_t_16 = 0;
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-      __pyx_t_3 = PyFloat_FromDouble(__pyx_t_7); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 118, __pyx_L1_error)
+      __pyx_t_3 = PyFloat_FromDouble(__pyx_t_7); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 121, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
       __Pyx_XDECREF_SET(__pyx_v_right_impurity, __pyx_t_3);
       __pyx_t_3 = 0;
 
-      /* "tree.pyx":120
+      /* "tree.pyx":123
  *                 right_impurity = self._topological_impurity(y[right_indices], adj_matrix[right_indices][:, right_indices])
  * 
  *                 child_impurity = left_indices.sum() / len(y) * left_impurity + right_indices.sum() / len(y) * right_impurity             # <<<<<<<<<<<<<<
  *                 impurity_reduction = parent_impurity - child_impurity # max this
  * 
  */
-      __pyx_t_16 = __Pyx_PyObject_GetAttrStr(__pyx_v_left_indices, __pyx_n_s_sum); if (unlikely(!__pyx_t_16)) __PYX_ERR(0, 120, __pyx_L1_error)
+      __pyx_t_16 = __Pyx_PyObject_GetAttrStr(__pyx_v_left_indices, __pyx_n_s_sum); if (unlikely(!__pyx_t_16)) __PYX_ERR(0, 123, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_16);
       __pyx_t_4 = NULL;
       __pyx_t_5 = 0;
@@ -7578,21 +7717,21 @@ static PyObject *__pyx_f_4tree_33TopologicalDecisionTreeClassifier__find_best_sp
         PyObject *__pyx_callargs[2] = {__pyx_t_4, NULL};
         __pyx_t_3 = __Pyx_PyObject_FastCall(__pyx_t_16, __pyx_callargs+1-__pyx_t_5, 0+__pyx_t_5);
         __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
-        if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 120, __pyx_L1_error)
+        if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 123, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_3);
         __Pyx_DECREF(__pyx_t_16); __pyx_t_16 = 0;
       }
-      __pyx_t_17 = PyObject_Length(((PyObject *)__pyx_v_y)); if (unlikely(__pyx_t_17 == ((Py_ssize_t)-1))) __PYX_ERR(0, 120, __pyx_L1_error)
-      __pyx_t_16 = PyInt_FromSsize_t(__pyx_t_17); if (unlikely(!__pyx_t_16)) __PYX_ERR(0, 120, __pyx_L1_error)
+      __pyx_t_17 = PyObject_Length(((PyObject *)__pyx_v_y)); if (unlikely(__pyx_t_17 == ((Py_ssize_t)-1))) __PYX_ERR(0, 123, __pyx_L1_error)
+      __pyx_t_16 = PyInt_FromSsize_t(__pyx_t_17); if (unlikely(!__pyx_t_16)) __PYX_ERR(0, 123, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_16);
-      __pyx_t_4 = __Pyx_PyNumber_Divide(__pyx_t_3, __pyx_t_16); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 120, __pyx_L1_error)
+      __pyx_t_4 = __Pyx_PyNumber_Divide(__pyx_t_3, __pyx_t_16); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 123, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
       __Pyx_DECREF(__pyx_t_16); __pyx_t_16 = 0;
-      __pyx_t_16 = PyNumber_Multiply(__pyx_t_4, __pyx_v_left_impurity); if (unlikely(!__pyx_t_16)) __PYX_ERR(0, 120, __pyx_L1_error)
+      __pyx_t_16 = PyNumber_Multiply(__pyx_t_4, __pyx_v_left_impurity); if (unlikely(!__pyx_t_16)) __PYX_ERR(0, 123, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_16);
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-      __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_right_indices, __pyx_n_s_sum); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 120, __pyx_L1_error)
+      __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_right_indices, __pyx_n_s_sum); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 123, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
       __pyx_t_2 = NULL;
       __pyx_t_5 = 0;
@@ -7612,48 +7751,48 @@ static PyObject *__pyx_f_4tree_33TopologicalDecisionTreeClassifier__find_best_sp
         PyObject *__pyx_callargs[2] = {__pyx_t_2, NULL};
         __pyx_t_4 = __Pyx_PyObject_FastCall(__pyx_t_3, __pyx_callargs+1-__pyx_t_5, 0+__pyx_t_5);
         __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
-        if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 120, __pyx_L1_error)
+        if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 123, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_4);
         __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
       }
-      __pyx_t_17 = PyObject_Length(((PyObject *)__pyx_v_y)); if (unlikely(__pyx_t_17 == ((Py_ssize_t)-1))) __PYX_ERR(0, 120, __pyx_L1_error)
-      __pyx_t_3 = PyInt_FromSsize_t(__pyx_t_17); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 120, __pyx_L1_error)
+      __pyx_t_17 = PyObject_Length(((PyObject *)__pyx_v_y)); if (unlikely(__pyx_t_17 == ((Py_ssize_t)-1))) __PYX_ERR(0, 123, __pyx_L1_error)
+      __pyx_t_3 = PyInt_FromSsize_t(__pyx_t_17); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 123, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
-      __pyx_t_2 = __Pyx_PyNumber_Divide(__pyx_t_4, __pyx_t_3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 120, __pyx_L1_error)
+      __pyx_t_2 = __Pyx_PyNumber_Divide(__pyx_t_4, __pyx_t_3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 123, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_2);
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-      __pyx_t_3 = PyNumber_Multiply(__pyx_t_2, __pyx_v_right_impurity); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 120, __pyx_L1_error)
+      __pyx_t_3 = PyNumber_Multiply(__pyx_t_2, __pyx_v_right_impurity); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 123, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-      __pyx_t_2 = PyNumber_Add(__pyx_t_16, __pyx_t_3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 120, __pyx_L1_error)
+      __pyx_t_2 = PyNumber_Add(__pyx_t_16, __pyx_t_3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 123, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_2);
       __Pyx_DECREF(__pyx_t_16); __pyx_t_16 = 0;
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
       __Pyx_XDECREF_SET(__pyx_v_child_impurity, __pyx_t_2);
       __pyx_t_2 = 0;
 
-      /* "tree.pyx":121
+      /* "tree.pyx":124
  * 
  *                 child_impurity = left_indices.sum() / len(y) * left_impurity + right_indices.sum() / len(y) * right_impurity
  *                 impurity_reduction = parent_impurity - child_impurity # max this             # <<<<<<<<<<<<<<
  * 
  *                 if (impurity_reduction > best_impurity_reduction and
  */
-      __pyx_t_2 = PyNumber_Subtract(__pyx_v_parent_impurity, __pyx_v_child_impurity); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 121, __pyx_L1_error)
+      __pyx_t_2 = PyNumber_Subtract(__pyx_v_parent_impurity, __pyx_v_child_impurity); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 124, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_2);
       __Pyx_XDECREF_SET(__pyx_v_impurity_reduction, __pyx_t_2);
       __pyx_t_2 = 0;
 
-      /* "tree.pyx":123
+      /* "tree.pyx":126
  *                 impurity_reduction = parent_impurity - child_impurity # max this
  * 
  *                 if (impurity_reduction > best_impurity_reduction and             # <<<<<<<<<<<<<<
  *                     impurity_reduction > self.min_impurity_reduction):
  * 
  */
-      __pyx_t_2 = PyObject_RichCompare(__pyx_v_impurity_reduction, __pyx_v_best_impurity_reduction, Py_GT); __Pyx_XGOTREF(__pyx_t_2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 123, __pyx_L1_error)
-      __pyx_t_15 = __Pyx_PyObject_IsTrue(__pyx_t_2); if (unlikely((__pyx_t_15 < 0))) __PYX_ERR(0, 123, __pyx_L1_error)
+      __pyx_t_2 = PyObject_RichCompare(__pyx_v_impurity_reduction, __pyx_v_best_impurity_reduction, Py_GT); __Pyx_XGOTREF(__pyx_t_2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 126, __pyx_L1_error)
+      __pyx_t_15 = __Pyx_PyObject_IsTrue(__pyx_t_2); if (unlikely((__pyx_t_15 < 0))) __PYX_ERR(0, 126, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
       if (__pyx_t_15) {
       } else {
@@ -7661,23 +7800,23 @@ static PyObject *__pyx_f_4tree_33TopologicalDecisionTreeClassifier__find_best_sp
         goto __pyx_L12_bool_binop_done;
       }
 
-      /* "tree.pyx":124
+      /* "tree.pyx":127
  * 
  *                 if (impurity_reduction > best_impurity_reduction and
  *                     impurity_reduction > self.min_impurity_reduction):             # <<<<<<<<<<<<<<
  * 
  *                     best_impurity_reduction = impurity_reduction
  */
-      __pyx_t_2 = PyFloat_FromDouble(__pyx_v_self->min_impurity_reduction); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 124, __pyx_L1_error)
+      __pyx_t_2 = PyFloat_FromDouble(__pyx_v_self->min_impurity_reduction); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 127, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_2);
-      __pyx_t_3 = PyObject_RichCompare(__pyx_v_impurity_reduction, __pyx_t_2, Py_GT); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 124, __pyx_L1_error)
+      __pyx_t_3 = PyObject_RichCompare(__pyx_v_impurity_reduction, __pyx_t_2, Py_GT); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 127, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-      __pyx_t_15 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely((__pyx_t_15 < 0))) __PYX_ERR(0, 124, __pyx_L1_error)
+      __pyx_t_15 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely((__pyx_t_15 < 0))) __PYX_ERR(0, 127, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
       __pyx_t_13 = __pyx_t_15;
       __pyx_L12_bool_binop_done:;
 
-      /* "tree.pyx":123
+      /* "tree.pyx":126
  *                 impurity_reduction = parent_impurity - child_impurity # max this
  * 
  *                 if (impurity_reduction > best_impurity_reduction and             # <<<<<<<<<<<<<<
@@ -7686,7 +7825,7 @@ static PyObject *__pyx_f_4tree_33TopologicalDecisionTreeClassifier__find_best_sp
  */
       if (__pyx_t_13) {
 
-        /* "tree.pyx":126
+        /* "tree.pyx":129
  *                     impurity_reduction > self.min_impurity_reduction):
  * 
  *                     best_impurity_reduction = impurity_reduction             # <<<<<<<<<<<<<<
@@ -7696,19 +7835,19 @@ static PyObject *__pyx_f_4tree_33TopologicalDecisionTreeClassifier__find_best_sp
         __Pyx_INCREF(__pyx_v_impurity_reduction);
         __Pyx_DECREF_SET(__pyx_v_best_impurity_reduction, __pyx_v_impurity_reduction);
 
-        /* "tree.pyx":127
+        /* "tree.pyx":130
  * 
  *                     best_impurity_reduction = impurity_reduction
  *                     best_split_feature = feature             # <<<<<<<<<<<<<<
  *                     best_split_value = split_value
  * 
  */
-        __pyx_t_3 = __Pyx_PyInt_From_Py_intptr_t(__pyx_v_feature); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 127, __pyx_L1_error)
+        __pyx_t_3 = __Pyx_PyInt_From_Py_intptr_t(__pyx_v_feature); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 130, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_3);
         __Pyx_DECREF_SET(__pyx_v_best_split_feature, __pyx_t_3);
         __pyx_t_3 = 0;
 
-        /* "tree.pyx":128
+        /* "tree.pyx":131
  *                     best_impurity_reduction = impurity_reduction
  *                     best_split_feature = feature
  *                     best_split_value = split_value             # <<<<<<<<<<<<<<
@@ -7718,7 +7857,7 @@ static PyObject *__pyx_f_4tree_33TopologicalDecisionTreeClassifier__find_best_sp
         __Pyx_INCREF(__pyx_v_split_value);
         __Pyx_DECREF_SET(__pyx_v_best_split_value, __pyx_v_split_value);
 
-        /* "tree.pyx":123
+        /* "tree.pyx":126
  *                 impurity_reduction = parent_impurity - child_impurity # max this
  * 
  *                 if (impurity_reduction > best_impurity_reduction and             # <<<<<<<<<<<<<<
@@ -7727,7 +7866,7 @@ static PyObject *__pyx_f_4tree_33TopologicalDecisionTreeClassifier__find_best_sp
  */
       }
 
-      /* "tree.pyx":109
+      /* "tree.pyx":112
  *                 continue
  * 
  *             for split_value in unique_values:             # <<<<<<<<<<<<<<
@@ -7740,7 +7879,7 @@ static PyObject *__pyx_f_4tree_33TopologicalDecisionTreeClassifier__find_best_sp
     __pyx_L3_continue:;
   }
 
-  /* "tree.pyx":130
+  /* "tree.pyx":133
  *                     best_split_value = split_value
  * 
  *         return best_split_feature, best_split_value             # <<<<<<<<<<<<<<
@@ -7748,19 +7887,19 @@ static PyObject *__pyx_f_4tree_33TopologicalDecisionTreeClassifier__find_best_sp
  *     cpdef np.ndarray predict(self, np.ndarray X):
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = PyTuple_New(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 130, __pyx_L1_error)
+  __pyx_t_1 = PyTuple_New(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 133, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_INCREF(__pyx_v_best_split_feature);
   __Pyx_GIVEREF(__pyx_v_best_split_feature);
-  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_v_best_split_feature)) __PYX_ERR(0, 130, __pyx_L1_error);
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_v_best_split_feature)) __PYX_ERR(0, 133, __pyx_L1_error);
   __Pyx_INCREF(__pyx_v_best_split_value);
   __Pyx_GIVEREF(__pyx_v_best_split_value);
-  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_1, 1, __pyx_v_best_split_value)) __PYX_ERR(0, 130, __pyx_L1_error);
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_1, 1, __pyx_v_best_split_value)) __PYX_ERR(0, 133, __pyx_L1_error);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "tree.pyx":98
+  /* "tree.pyx":101
  *         return topological_impurity
  * 
  *     cpdef _find_best_split(self, np.ndarray X, np.ndarray y, np.ndarray adj_matrix):             # <<<<<<<<<<<<<<
@@ -7854,7 +7993,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[0]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 98, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 101, __pyx_L3_error)
         else goto __pyx_L5_argtuple_error;
         CYTHON_FALLTHROUGH;
         case  1:
@@ -7862,9 +8001,9 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[1]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 98, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 101, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("_find_best_split", 1, 3, 3, 1); __PYX_ERR(0, 98, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("_find_best_split", 1, 3, 3, 1); __PYX_ERR(0, 101, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
@@ -7872,14 +8011,14 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[2]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 98, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 101, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("_find_best_split", 1, 3, 3, 2); __PYX_ERR(0, 98, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("_find_best_split", 1, 3, 3, 2); __PYX_ERR(0, 101, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
         const Py_ssize_t kwd_pos_args = __pyx_nargs;
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "_find_best_split") < 0)) __PYX_ERR(0, 98, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "_find_best_split") < 0)) __PYX_ERR(0, 101, __pyx_L3_error)
       }
     } else if (unlikely(__pyx_nargs != 3)) {
       goto __pyx_L5_argtuple_error;
@@ -7894,7 +8033,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   }
   goto __pyx_L6_skip;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("_find_best_split", 1, 3, 3, __pyx_nargs); __PYX_ERR(0, 98, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("_find_best_split", 1, 3, 3, __pyx_nargs); __PYX_ERR(0, 101, __pyx_L3_error)
   __pyx_L6_skip:;
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -7908,9 +8047,9 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_X), __pyx_ptype_5numpy_ndarray, 1, "X", 0))) __PYX_ERR(0, 98, __pyx_L1_error)
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_y), __pyx_ptype_5numpy_ndarray, 1, "y", 0))) __PYX_ERR(0, 98, __pyx_L1_error)
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_adj_matrix), __pyx_ptype_5numpy_ndarray, 1, "adj_matrix", 0))) __PYX_ERR(0, 98, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_X), __pyx_ptype_5numpy_ndarray, 1, "X", 0))) __PYX_ERR(0, 101, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_y), __pyx_ptype_5numpy_ndarray, 1, "y", 0))) __PYX_ERR(0, 101, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_adj_matrix), __pyx_ptype_5numpy_ndarray, 1, "adj_matrix", 0))) __PYX_ERR(0, 101, __pyx_L1_error)
   __pyx_r = __pyx_pf_4tree_33TopologicalDecisionTreeClassifier_6_find_best_split(((struct __pyx_obj_4tree_TopologicalDecisionTreeClassifier *)__pyx_v_self), __pyx_v_X, __pyx_v_y, __pyx_v_adj_matrix);
 
   /* function exit code */
@@ -7937,7 +8076,7 @@ static PyObject *__pyx_pf_4tree_33TopologicalDecisionTreeClassifier_6_find_best_
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("_find_best_split", 1);
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __pyx_f_4tree_33TopologicalDecisionTreeClassifier__find_best_split(__pyx_v_self, __pyx_v_X, __pyx_v_y, __pyx_v_adj_matrix, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 98, __pyx_L1_error)
+  __pyx_t_1 = __pyx_f_4tree_33TopologicalDecisionTreeClassifier__find_best_split(__pyx_v_self, __pyx_v_X, __pyx_v_y, __pyx_v_adj_matrix, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 101, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -7954,7 +8093,7 @@ static PyObject *__pyx_pf_4tree_33TopologicalDecisionTreeClassifier_6_find_best_
   return __pyx_r;
 }
 
-/* "tree.pyx":132
+/* "tree.pyx":135
  *         return best_split_feature, best_split_value
  * 
  *     cpdef np.ndarray predict(self, np.ndarray X):             # <<<<<<<<<<<<<<
@@ -7995,7 +8134,7 @@ static PyArrayObject *__pyx_f_4tree_33TopologicalDecisionTreeClassifier_predict(
     if (unlikely(!__Pyx_object_dict_version_matches(((PyObject *)__pyx_v_self), __pyx_tp_dict_version, __pyx_obj_dict_version))) {
       PY_UINT64_T __pyx_typedict_guard = __Pyx_get_tp_dict_version(((PyObject *)__pyx_v_self));
       #endif
-      __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_predict); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 132, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_predict); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 135, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
       if (!__Pyx_IsSameCFunction(__pyx_t_1, (void*) __pyx_pw_4tree_33TopologicalDecisionTreeClassifier_9predict)) {
         __Pyx_XDECREF((PyObject *)__pyx_r);
@@ -8018,11 +8157,11 @@ static PyArrayObject *__pyx_f_4tree_33TopologicalDecisionTreeClassifier_predict(
           PyObject *__pyx_callargs[2] = {__pyx_t_4, ((PyObject *)__pyx_v_X)};
           __pyx_t_2 = __Pyx_PyObject_FastCall(__pyx_t_3, __pyx_callargs+1-__pyx_t_5, 1+__pyx_t_5);
           __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
-          if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 132, __pyx_L1_error)
+          if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 135, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_2);
           __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
         }
-        if (!(likely(((__pyx_t_2) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_2, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 132, __pyx_L1_error)
+        if (!(likely(((__pyx_t_2) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_2, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 135, __pyx_L1_error)
         __pyx_r = ((PyArrayObject *)__pyx_t_2);
         __pyx_t_2 = 0;
         __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -8041,30 +8180,30 @@ static PyArrayObject *__pyx_f_4tree_33TopologicalDecisionTreeClassifier_predict(
     #endif
   }
 
-  /* "tree.pyx":133
+  /* "tree.pyx":136
  * 
  *     cpdef np.ndarray predict(self, np.ndarray X):
  *         predictions = np.zeros(len(X), dtype=int)             # <<<<<<<<<<<<<<
  *         for i, sample in enumerate(X):
  *             predictions[i] = self._predict_sample(sample, self.tree_)
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 133, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 136, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_zeros); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 133, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_zeros); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 136, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_6 = PyObject_Length(((PyObject *)__pyx_v_X)); if (unlikely(__pyx_t_6 == ((Py_ssize_t)-1))) __PYX_ERR(0, 133, __pyx_L1_error)
-  __pyx_t_1 = PyInt_FromSsize_t(__pyx_t_6); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 133, __pyx_L1_error)
+  __pyx_t_6 = PyObject_Length(((PyObject *)__pyx_v_X)); if (unlikely(__pyx_t_6 == ((Py_ssize_t)-1))) __PYX_ERR(0, 136, __pyx_L1_error)
+  __pyx_t_1 = PyInt_FromSsize_t(__pyx_t_6); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 136, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 133, __pyx_L1_error)
+  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 136, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_GIVEREF(__pyx_t_1);
-  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_1)) __PYX_ERR(0, 133, __pyx_L1_error);
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_1)) __PYX_ERR(0, 136, __pyx_L1_error);
   __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 133, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 136, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_dtype, ((PyObject *)(&PyInt_Type))) < 0) __PYX_ERR(0, 133, __pyx_L1_error)
-  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_3, __pyx_t_1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 133, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_dtype, ((PyObject *)(&PyInt_Type))) < 0) __PYX_ERR(0, 136, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_3, __pyx_t_1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 136, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
@@ -8072,7 +8211,7 @@ static PyArrayObject *__pyx_f_4tree_33TopologicalDecisionTreeClassifier_predict(
   __pyx_v_predictions = __pyx_t_4;
   __pyx_t_4 = 0;
 
-  /* "tree.pyx":134
+  /* "tree.pyx":137
  *     cpdef np.ndarray predict(self, np.ndarray X):
  *         predictions = np.zeros(len(X), dtype=int)
  *         for i, sample in enumerate(X):             # <<<<<<<<<<<<<<
@@ -8086,9 +8225,9 @@ static PyArrayObject *__pyx_f_4tree_33TopologicalDecisionTreeClassifier_predict(
     __pyx_t_6 = 0;
     __pyx_t_7 = NULL;
   } else {
-    __pyx_t_6 = -1; __pyx_t_1 = PyObject_GetIter(((PyObject *)__pyx_v_X)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 134, __pyx_L1_error)
+    __pyx_t_6 = -1; __pyx_t_1 = PyObject_GetIter(((PyObject *)__pyx_v_X)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 137, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_7 = __Pyx_PyObject_GetIterNextFunc(__pyx_t_1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 134, __pyx_L1_error)
+    __pyx_t_7 = __Pyx_PyObject_GetIterNextFunc(__pyx_t_1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 137, __pyx_L1_error)
   }
   for (;;) {
     if (likely(!__pyx_t_7)) {
@@ -8096,28 +8235,28 @@ static PyArrayObject *__pyx_f_4tree_33TopologicalDecisionTreeClassifier_predict(
         {
           Py_ssize_t __pyx_temp = __Pyx_PyList_GET_SIZE(__pyx_t_1);
           #if !CYTHON_ASSUME_SAFE_MACROS
-          if (unlikely((__pyx_temp < 0))) __PYX_ERR(0, 134, __pyx_L1_error)
+          if (unlikely((__pyx_temp < 0))) __PYX_ERR(0, 137, __pyx_L1_error)
           #endif
           if (__pyx_t_6 >= __pyx_temp) break;
         }
         #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-        __pyx_t_3 = PyList_GET_ITEM(__pyx_t_1, __pyx_t_6); __Pyx_INCREF(__pyx_t_3); __pyx_t_6++; if (unlikely((0 < 0))) __PYX_ERR(0, 134, __pyx_L1_error)
+        __pyx_t_3 = PyList_GET_ITEM(__pyx_t_1, __pyx_t_6); __Pyx_INCREF(__pyx_t_3); __pyx_t_6++; if (unlikely((0 < 0))) __PYX_ERR(0, 137, __pyx_L1_error)
         #else
-        __pyx_t_3 = __Pyx_PySequence_ITEM(__pyx_t_1, __pyx_t_6); __pyx_t_6++; if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 134, __pyx_L1_error)
+        __pyx_t_3 = __Pyx_PySequence_ITEM(__pyx_t_1, __pyx_t_6); __pyx_t_6++; if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 137, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_3);
         #endif
       } else {
         {
           Py_ssize_t __pyx_temp = __Pyx_PyTuple_GET_SIZE(__pyx_t_1);
           #if !CYTHON_ASSUME_SAFE_MACROS
-          if (unlikely((__pyx_temp < 0))) __PYX_ERR(0, 134, __pyx_L1_error)
+          if (unlikely((__pyx_temp < 0))) __PYX_ERR(0, 137, __pyx_L1_error)
           #endif
           if (__pyx_t_6 >= __pyx_temp) break;
         }
         #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-        __pyx_t_3 = PyTuple_GET_ITEM(__pyx_t_1, __pyx_t_6); __Pyx_INCREF(__pyx_t_3); __pyx_t_6++; if (unlikely((0 < 0))) __PYX_ERR(0, 134, __pyx_L1_error)
+        __pyx_t_3 = PyTuple_GET_ITEM(__pyx_t_1, __pyx_t_6); __Pyx_INCREF(__pyx_t_3); __pyx_t_6++; if (unlikely((0 < 0))) __PYX_ERR(0, 137, __pyx_L1_error)
         #else
-        __pyx_t_3 = __Pyx_PySequence_ITEM(__pyx_t_1, __pyx_t_6); __pyx_t_6++; if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 134, __pyx_L1_error)
+        __pyx_t_3 = __Pyx_PySequence_ITEM(__pyx_t_1, __pyx_t_6); __pyx_t_6++; if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 137, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_3);
         #endif
       }
@@ -8127,7 +8266,7 @@ static PyArrayObject *__pyx_f_4tree_33TopologicalDecisionTreeClassifier_predict(
         PyObject* exc_type = PyErr_Occurred();
         if (exc_type) {
           if (likely(__Pyx_PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
-          else __PYX_ERR(0, 134, __pyx_L1_error)
+          else __PYX_ERR(0, 137, __pyx_L1_error)
         }
         break;
       }
@@ -8137,30 +8276,30 @@ static PyArrayObject *__pyx_f_4tree_33TopologicalDecisionTreeClassifier_predict(
     __pyx_t_3 = 0;
     __Pyx_INCREF(__pyx_t_4);
     __Pyx_XDECREF_SET(__pyx_v_i, __pyx_t_4);
-    __pyx_t_3 = __Pyx_PyInt_AddObjC(__pyx_t_4, __pyx_int_1, 1, 0, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 134, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyInt_AddObjC(__pyx_t_4, __pyx_int_1, 1, 0, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 137, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_4);
     __pyx_t_4 = __pyx_t_3;
     __pyx_t_3 = 0;
 
-    /* "tree.pyx":135
+    /* "tree.pyx":138
  *         predictions = np.zeros(len(X), dtype=int)
  *         for i, sample in enumerate(X):
  *             predictions[i] = self._predict_sample(sample, self.tree_)             # <<<<<<<<<<<<<<
  *         return predictions
  * 
  */
-    if (!(likely(((__pyx_v_sample) == Py_None) || likely(__Pyx_TypeTest(__pyx_v_sample, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 135, __pyx_L1_error)
+    if (!(likely(((__pyx_v_sample) == Py_None) || likely(__Pyx_TypeTest(__pyx_v_sample, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 138, __pyx_L1_error)
     __pyx_t_3 = __pyx_v_self->tree_;
     __Pyx_INCREF(__pyx_t_3);
-    __pyx_t_5 = ((struct __pyx_vtabstruct_4tree_TopologicalDecisionTreeClassifier *)__pyx_v_self->__pyx_vtab)->_predict_sample(__pyx_v_self, ((PyArrayObject *)__pyx_v_sample), ((PyObject*)__pyx_t_3)); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 135, __pyx_L1_error)
+    __pyx_t_5 = ((struct __pyx_vtabstruct_4tree_TopologicalDecisionTreeClassifier *)__pyx_v_self->__pyx_vtab)->_predict_sample(__pyx_v_self, ((PyArrayObject *)__pyx_v_sample), ((PyObject*)__pyx_t_3)); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 138, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_t_5); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 135, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_t_5); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 138, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    if (unlikely((PyObject_SetItem(__pyx_v_predictions, __pyx_v_i, __pyx_t_3) < 0))) __PYX_ERR(0, 135, __pyx_L1_error)
+    if (unlikely((PyObject_SetItem(__pyx_v_predictions, __pyx_v_i, __pyx_t_3) < 0))) __PYX_ERR(0, 138, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-    /* "tree.pyx":134
+    /* "tree.pyx":137
  *     cpdef np.ndarray predict(self, np.ndarray X):
  *         predictions = np.zeros(len(X), dtype=int)
  *         for i, sample in enumerate(X):             # <<<<<<<<<<<<<<
@@ -8171,7 +8310,7 @@ static PyArrayObject *__pyx_f_4tree_33TopologicalDecisionTreeClassifier_predict(
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-  /* "tree.pyx":136
+  /* "tree.pyx":139
  *         for i, sample in enumerate(X):
  *             predictions[i] = self._predict_sample(sample, self.tree_)
  *         return predictions             # <<<<<<<<<<<<<<
@@ -8179,12 +8318,12 @@ static PyArrayObject *__pyx_f_4tree_33TopologicalDecisionTreeClassifier_predict(
  *     cdef int _predict_sample(self, np.ndarray sample, dict node):
  */
   __Pyx_XDECREF((PyObject *)__pyx_r);
-  if (!(likely(((__pyx_v_predictions) == Py_None) || likely(__Pyx_TypeTest(__pyx_v_predictions, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 136, __pyx_L1_error)
+  if (!(likely(((__pyx_v_predictions) == Py_None) || likely(__Pyx_TypeTest(__pyx_v_predictions, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 139, __pyx_L1_error)
   __Pyx_INCREF(__pyx_v_predictions);
   __pyx_r = ((PyArrayObject *)__pyx_v_predictions);
   goto __pyx_L0;
 
-  /* "tree.pyx":132
+  /* "tree.pyx":135
  *         return best_split_feature, best_split_value
  * 
  *     cpdef np.ndarray predict(self, np.ndarray X):             # <<<<<<<<<<<<<<
@@ -8262,12 +8401,12 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[0]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 132, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 135, __pyx_L3_error)
         else goto __pyx_L5_argtuple_error;
       }
       if (unlikely(kw_args > 0)) {
         const Py_ssize_t kwd_pos_args = __pyx_nargs;
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "predict") < 0)) __PYX_ERR(0, 132, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "predict") < 0)) __PYX_ERR(0, 135, __pyx_L3_error)
       }
     } else if (unlikely(__pyx_nargs != 1)) {
       goto __pyx_L5_argtuple_error;
@@ -8278,7 +8417,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   }
   goto __pyx_L6_skip;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("predict", 1, 1, 1, __pyx_nargs); __PYX_ERR(0, 132, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("predict", 1, 1, 1, __pyx_nargs); __PYX_ERR(0, 135, __pyx_L3_error)
   __pyx_L6_skip:;
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -8292,7 +8431,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_X), __pyx_ptype_5numpy_ndarray, 1, "X", 0))) __PYX_ERR(0, 132, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_X), __pyx_ptype_5numpy_ndarray, 1, "X", 0))) __PYX_ERR(0, 135, __pyx_L1_error)
   __pyx_r = __pyx_pf_4tree_33TopologicalDecisionTreeClassifier_8predict(((struct __pyx_obj_4tree_TopologicalDecisionTreeClassifier *)__pyx_v_self), __pyx_v_X);
 
   /* function exit code */
@@ -8319,7 +8458,7 @@ static PyObject *__pyx_pf_4tree_33TopologicalDecisionTreeClassifier_8predict(str
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("predict", 1);
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = ((PyObject *)__pyx_f_4tree_33TopologicalDecisionTreeClassifier_predict(__pyx_v_self, __pyx_v_X, 1)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 132, __pyx_L1_error)
+  __pyx_t_1 = ((PyObject *)__pyx_f_4tree_33TopologicalDecisionTreeClassifier_predict(__pyx_v_self, __pyx_v_X, 1)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 135, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -8336,7 +8475,7 @@ static PyObject *__pyx_pf_4tree_33TopologicalDecisionTreeClassifier_8predict(str
   return __pyx_r;
 }
 
-/* "tree.pyx":138
+/* "tree.pyx":141
  *         return predictions
  * 
  *     cdef int _predict_sample(self, np.ndarray sample, dict node):             # <<<<<<<<<<<<<<
@@ -8357,7 +8496,7 @@ static int __pyx_f_4tree_33TopologicalDecisionTreeClassifier__predict_sample(str
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("_predict_sample", 1);
 
-  /* "tree.pyx":139
+  /* "tree.pyx":142
  * 
  *     cdef int _predict_sample(self, np.ndarray sample, dict node):
  *         if node is None:             # <<<<<<<<<<<<<<
@@ -8367,20 +8506,20 @@ static int __pyx_f_4tree_33TopologicalDecisionTreeClassifier__predict_sample(str
   __pyx_t_1 = (__pyx_v_node == ((PyObject*)Py_None));
   if (unlikely(__pyx_t_1)) {
 
-    /* "tree.pyx":140
+    /* "tree.pyx":143
  *     cdef int _predict_sample(self, np.ndarray sample, dict node):
  *         if node is None:
  *             raise ValueError("Expected a non-None dictionary node")             # <<<<<<<<<<<<<<
  * 
  *         if node.get("leaf"):
  */
-    __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__9, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 140, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__9, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 143, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_Raise(__pyx_t_2, 0, 0, 0);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    __PYX_ERR(0, 140, __pyx_L1_error)
+    __PYX_ERR(0, 143, __pyx_L1_error)
 
-    /* "tree.pyx":139
+    /* "tree.pyx":142
  * 
  *     cdef int _predict_sample(self, np.ndarray sample, dict node):
  *         if node is None:             # <<<<<<<<<<<<<<
@@ -8389,7 +8528,7 @@ static int __pyx_f_4tree_33TopologicalDecisionTreeClassifier__predict_sample(str
  */
   }
 
-  /* "tree.pyx":142
+  /* "tree.pyx":145
  *             raise ValueError("Expected a non-None dictionary node")
  * 
  *         if node.get("leaf"):             # <<<<<<<<<<<<<<
@@ -8398,15 +8537,15 @@ static int __pyx_f_4tree_33TopologicalDecisionTreeClassifier__predict_sample(str
  */
   if (unlikely(__pyx_v_node == Py_None)) {
     PyErr_Format(PyExc_AttributeError, "'NoneType' object has no attribute '%.30s'", "get");
-    __PYX_ERR(0, 142, __pyx_L1_error)
+    __PYX_ERR(0, 145, __pyx_L1_error)
   }
-  __pyx_t_2 = __Pyx_PyDict_GetItemDefault(__pyx_v_node, __pyx_n_u_leaf, Py_None); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 142, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyDict_GetItemDefault(__pyx_v_node, __pyx_n_u_leaf, Py_None); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 145, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_t_2); if (unlikely((__pyx_t_1 < 0))) __PYX_ERR(0, 142, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_t_2); if (unlikely((__pyx_t_1 < 0))) __PYX_ERR(0, 145, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   if (__pyx_t_1) {
 
-    /* "tree.pyx":143
+    /* "tree.pyx":146
  * 
  *         if node.get("leaf"):
  *             return node["class"]             # <<<<<<<<<<<<<<
@@ -8415,16 +8554,16 @@ static int __pyx_f_4tree_33TopologicalDecisionTreeClassifier__predict_sample(str
  */
     if (unlikely(__pyx_v_node == Py_None)) {
       PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
-      __PYX_ERR(0, 143, __pyx_L1_error)
+      __PYX_ERR(0, 146, __pyx_L1_error)
     }
-    __pyx_t_2 = __Pyx_PyDict_GetItem(__pyx_v_node, __pyx_n_u_class); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 143, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyDict_GetItem(__pyx_v_node, __pyx_n_u_class); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 146, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_3 = __Pyx_PyInt_As_int(__pyx_t_2); if (unlikely((__pyx_t_3 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 143, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyInt_As_int(__pyx_t_2); if (unlikely((__pyx_t_3 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 146, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __pyx_r = __pyx_t_3;
     goto __pyx_L0;
 
-    /* "tree.pyx":142
+    /* "tree.pyx":145
  *             raise ValueError("Expected a non-None dictionary node")
  * 
  *         if node.get("leaf"):             # <<<<<<<<<<<<<<
@@ -8433,7 +8572,7 @@ static int __pyx_f_4tree_33TopologicalDecisionTreeClassifier__predict_sample(str
  */
   }
 
-  /* "tree.pyx":145
+  /* "tree.pyx":148
  *             return node["class"]
  * 
  *         if sample[node["split_feature"]] <= node["split_value"]:             # <<<<<<<<<<<<<<
@@ -8442,27 +8581,27 @@ static int __pyx_f_4tree_33TopologicalDecisionTreeClassifier__predict_sample(str
  */
   if (unlikely(__pyx_v_node == Py_None)) {
     PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
-    __PYX_ERR(0, 145, __pyx_L1_error)
+    __PYX_ERR(0, 148, __pyx_L1_error)
   }
-  __pyx_t_2 = __Pyx_PyDict_GetItem(__pyx_v_node, __pyx_n_u_split_feature); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 145, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyDict_GetItem(__pyx_v_node, __pyx_n_u_split_feature); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 148, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_4 = __Pyx_PyObject_GetItem(((PyObject *)__pyx_v_sample), __pyx_t_2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 145, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_GetItem(((PyObject *)__pyx_v_sample), __pyx_t_2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 148, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   if (unlikely(__pyx_v_node == Py_None)) {
     PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
-    __PYX_ERR(0, 145, __pyx_L1_error)
+    __PYX_ERR(0, 148, __pyx_L1_error)
   }
-  __pyx_t_2 = __Pyx_PyDict_GetItem(__pyx_v_node, __pyx_n_u_split_value); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 145, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyDict_GetItem(__pyx_v_node, __pyx_n_u_split_value); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 148, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_5 = PyObject_RichCompare(__pyx_t_4, __pyx_t_2, Py_LE); __Pyx_XGOTREF(__pyx_t_5); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 145, __pyx_L1_error)
+  __pyx_t_5 = PyObject_RichCompare(__pyx_t_4, __pyx_t_2, Py_LE); __Pyx_XGOTREF(__pyx_t_5); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 148, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_t_5); if (unlikely((__pyx_t_1 < 0))) __PYX_ERR(0, 145, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_t_5); if (unlikely((__pyx_t_1 < 0))) __PYX_ERR(0, 148, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   if (__pyx_t_1) {
 
-    /* "tree.pyx":146
+    /* "tree.pyx":149
  * 
  *         if sample[node["split_feature"]] <= node["split_value"]:
  *             return self._predict_sample(sample, node["left"])             # <<<<<<<<<<<<<<
@@ -8471,17 +8610,17 @@ static int __pyx_f_4tree_33TopologicalDecisionTreeClassifier__predict_sample(str
  */
     if (unlikely(__pyx_v_node == Py_None)) {
       PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
-      __PYX_ERR(0, 146, __pyx_L1_error)
+      __PYX_ERR(0, 149, __pyx_L1_error)
     }
-    __pyx_t_5 = __Pyx_PyDict_GetItem(__pyx_v_node, __pyx_n_u_left); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 146, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyDict_GetItem(__pyx_v_node, __pyx_n_u_left); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 149, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
-    if (!(likely(PyDict_CheckExact(__pyx_t_5))||((__pyx_t_5) == Py_None) || __Pyx_RaiseUnexpectedTypeError("dict", __pyx_t_5))) __PYX_ERR(0, 146, __pyx_L1_error)
-    __pyx_t_3 = ((struct __pyx_vtabstruct_4tree_TopologicalDecisionTreeClassifier *)__pyx_v_self->__pyx_vtab)->_predict_sample(__pyx_v_self, __pyx_v_sample, ((PyObject*)__pyx_t_5)); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 146, __pyx_L1_error)
+    if (!(likely(PyDict_CheckExact(__pyx_t_5))||((__pyx_t_5) == Py_None) || __Pyx_RaiseUnexpectedTypeError("dict", __pyx_t_5))) __PYX_ERR(0, 149, __pyx_L1_error)
+    __pyx_t_3 = ((struct __pyx_vtabstruct_4tree_TopologicalDecisionTreeClassifier *)__pyx_v_self->__pyx_vtab)->_predict_sample(__pyx_v_self, __pyx_v_sample, ((PyObject*)__pyx_t_5)); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 149, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     __pyx_r = __pyx_t_3;
     goto __pyx_L0;
 
-    /* "tree.pyx":145
+    /* "tree.pyx":148
  *             return node["class"]
  * 
  *         if sample[node["split_feature"]] <= node["split_value"]:             # <<<<<<<<<<<<<<
@@ -8490,7 +8629,7 @@ static int __pyx_f_4tree_33TopologicalDecisionTreeClassifier__predict_sample(str
  */
   }
 
-  /* "tree.pyx":148
+  /* "tree.pyx":151
  *             return self._predict_sample(sample, node["left"])
  *         else:
  *             return self._predict_sample(sample, node["right"])             # <<<<<<<<<<<<<<
@@ -8498,18 +8637,18 @@ static int __pyx_f_4tree_33TopologicalDecisionTreeClassifier__predict_sample(str
   /*else*/ {
     if (unlikely(__pyx_v_node == Py_None)) {
       PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
-      __PYX_ERR(0, 148, __pyx_L1_error)
+      __PYX_ERR(0, 151, __pyx_L1_error)
     }
-    __pyx_t_5 = __Pyx_PyDict_GetItem(__pyx_v_node, __pyx_n_u_right); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 148, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyDict_GetItem(__pyx_v_node, __pyx_n_u_right); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 151, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
-    if (!(likely(PyDict_CheckExact(__pyx_t_5))||((__pyx_t_5) == Py_None) || __Pyx_RaiseUnexpectedTypeError("dict", __pyx_t_5))) __PYX_ERR(0, 148, __pyx_L1_error)
-    __pyx_t_3 = ((struct __pyx_vtabstruct_4tree_TopologicalDecisionTreeClassifier *)__pyx_v_self->__pyx_vtab)->_predict_sample(__pyx_v_self, __pyx_v_sample, ((PyObject*)__pyx_t_5)); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 148, __pyx_L1_error)
+    if (!(likely(PyDict_CheckExact(__pyx_t_5))||((__pyx_t_5) == Py_None) || __Pyx_RaiseUnexpectedTypeError("dict", __pyx_t_5))) __PYX_ERR(0, 151, __pyx_L1_error)
+    __pyx_t_3 = ((struct __pyx_vtabstruct_4tree_TopologicalDecisionTreeClassifier *)__pyx_v_self->__pyx_vtab)->_predict_sample(__pyx_v_self, __pyx_v_sample, ((PyObject*)__pyx_t_5)); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 151, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     __pyx_r = __pyx_t_3;
     goto __pyx_L0;
   }
 
-  /* "tree.pyx":138
+  /* "tree.pyx":141
  *         return predictions
  * 
  *     cdef int _predict_sample(self, np.ndarray sample, dict node):             # <<<<<<<<<<<<<<
@@ -9681,9 +9820,11 @@ static int __Pyx_CreateStringTabAndInitStrings(void) {
     {&__pyx_n_s__12, __pyx_k__12, sizeof(__pyx_k__12), 0, 0, 1, 1},
     {&__pyx_n_s__26, __pyx_k__26, sizeof(__pyx_k__26), 0, 0, 1, 1},
     {&__pyx_n_s_adj_matrix, __pyx_k_adj_matrix, sizeof(__pyx_k_adj_matrix), 0, 0, 1, 1},
+    {&__pyx_n_u_after, __pyx_k_after, sizeof(__pyx_k_after), 0, 1, 0, 1},
     {&__pyx_n_s_argmax, __pyx_k_argmax, sizeof(__pyx_k_argmax), 0, 0, 1, 1},
     {&__pyx_n_s_astype, __pyx_k_astype, sizeof(__pyx_k_astype), 0, 0, 1, 1},
     {&__pyx_n_s_asyncio_coroutines, __pyx_k_asyncio_coroutines, sizeof(__pyx_k_asyncio_coroutines), 0, 0, 1, 1},
+    {&__pyx_n_u_before, __pyx_k_before, sizeof(__pyx_k_before), 0, 1, 0, 1},
     {&__pyx_n_s_bincount, __pyx_k_bincount, sizeof(__pyx_k_bincount), 0, 0, 1, 1},
     {&__pyx_n_u_class, __pyx_k_class, sizeof(__pyx_k_class), 0, 1, 0, 1},
     {&__pyx_n_s_class_getitem, __pyx_k_class_getitem, sizeof(__pyx_k_class_getitem), 0, 0, 1, 1},
@@ -9722,6 +9863,7 @@ static int __Pyx_CreateStringTabAndInitStrings(void) {
     {&__pyx_kp_u_numpy_core_umath_failed_to_impor, __pyx_k_numpy_core_umath_failed_to_impor, sizeof(__pyx_k_numpy_core_umath_failed_to_impor), 0, 1, 0, 0},
     {&__pyx_n_s_pickle, __pyx_k_pickle, sizeof(__pyx_k_pickle), 0, 0, 1, 1},
     {&__pyx_n_s_predict, __pyx_k_predict, sizeof(__pyx_k_predict), 0, 0, 1, 1},
+    {&__pyx_n_s_print, __pyx_k_print, sizeof(__pyx_k_print), 0, 0, 1, 1},
     {&__pyx_n_s_prod, __pyx_k_prod, sizeof(__pyx_k_prod), 0, 0, 1, 1},
     {&__pyx_n_s_pyx_PickleError, __pyx_k_pyx_PickleError, sizeof(__pyx_k_pyx_PickleError), 0, 0, 1, 1},
     {&__pyx_n_s_pyx_checksum, __pyx_k_pyx_checksum, sizeof(__pyx_k_pyx_checksum), 0, 0, 1, 1},
@@ -9737,6 +9879,7 @@ static int __Pyx_CreateStringTabAndInitStrings(void) {
     {&__pyx_n_s_return_counts, __pyx_k_return_counts, sizeof(__pyx_k_return_counts), 0, 0, 1, 1},
     {&__pyx_n_u_right, __pyx_k_right, sizeof(__pyx_k_right), 0, 1, 0, 1},
     {&__pyx_n_s_self, __pyx_k_self, sizeof(__pyx_k_self), 0, 0, 1, 1},
+    {&__pyx_kp_u_self_mol_net_threshold, __pyx_k_self_mol_net_threshold, sizeof(__pyx_k_self_mol_net_threshold), 0, 1, 0, 0},
     {&__pyx_n_s_setstate, __pyx_k_setstate, sizeof(__pyx_k_setstate), 0, 0, 1, 1},
     {&__pyx_n_s_setstate_cython, __pyx_k_setstate_cython, sizeof(__pyx_k_setstate_cython), 0, 0, 1, 1},
     {&__pyx_n_s_spec, __pyx_k_spec, sizeof(__pyx_k_spec), 0, 0, 1, 1},
@@ -9763,10 +9906,11 @@ static int __Pyx_CreateStringTabAndInitStrings(void) {
 }
 /* #### Code section: cached_builtins ### */
 static CYTHON_SMALL_CODE int __Pyx_InitCachedBuiltins(void) {
-  __pyx_builtin_AssertionError = __Pyx_GetBuiltinName(__pyx_n_s_AssertionError); if (!__pyx_builtin_AssertionError) __PYX_ERR(0, 34, __pyx_L1_error)
-  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) __PYX_ERR(0, 104, __pyx_L1_error)
-  __pyx_builtin_enumerate = __Pyx_GetBuiltinName(__pyx_n_s_enumerate); if (!__pyx_builtin_enumerate) __PYX_ERR(0, 134, __pyx_L1_error)
-  __pyx_builtin_ValueError = __Pyx_GetBuiltinName(__pyx_n_s_ValueError); if (!__pyx_builtin_ValueError) __PYX_ERR(0, 140, __pyx_L1_error)
+  __pyx_builtin_print = __Pyx_GetBuiltinName(__pyx_n_s_print); if (!__pyx_builtin_print) __PYX_ERR(0, 33, __pyx_L1_error)
+  __pyx_builtin_AssertionError = __Pyx_GetBuiltinName(__pyx_n_s_AssertionError); if (!__pyx_builtin_AssertionError) __PYX_ERR(0, 37, __pyx_L1_error)
+  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) __PYX_ERR(0, 107, __pyx_L1_error)
+  __pyx_builtin_enumerate = __Pyx_GetBuiltinName(__pyx_n_s_enumerate); if (!__pyx_builtin_enumerate) __PYX_ERR(0, 137, __pyx_L1_error)
+  __pyx_builtin_ValueError = __Pyx_GetBuiltinName(__pyx_n_s_ValueError); if (!__pyx_builtin_ValueError) __PYX_ERR(0, 143, __pyx_L1_error)
   __pyx_builtin_ImportError = __Pyx_GetBuiltinName(__pyx_n_s_ImportError); if (!__pyx_builtin_ImportError) __PYX_ERR(1, 984, __pyx_L1_error)
   return 0;
   __pyx_L1_error:;
@@ -9800,39 +9944,39 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple__2);
   __Pyx_GIVEREF(__pyx_tuple__2);
 
-  /* "tree.pyx":59
+  /* "tree.pyx":62
  *             return leaf_node
  * 
  *         left_indices = X[:, best_split_feature] <= best_split_value             # <<<<<<<<<<<<<<
  *         right_indices = ~left_indices
  * 
  */
-  __pyx_slice__6 = PySlice_New(Py_None, Py_None, Py_None); if (unlikely(!__pyx_slice__6)) __PYX_ERR(0, 59, __pyx_L1_error)
+  __pyx_slice__6 = PySlice_New(Py_None, Py_None, Py_None); if (unlikely(!__pyx_slice__6)) __PYX_ERR(0, 62, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_slice__6);
   __Pyx_GIVEREF(__pyx_slice__6);
 
-  /* "tree.pyx":84
+  /* "tree.pyx":87
  * 
  *         # Count edges between different classes using vectorized operation
  *         edges_between_classes = np.sum(adj_matrix * (y[:, None] != y[None, :])) / 2             # <<<<<<<<<<<<<<
  *         # Compute the product of class proportions
  *         class_proportions_product = np.prod(class_counts / total_samples)
  */
-  __pyx_tuple__7 = PyTuple_Pack(2, __pyx_slice__6, Py_None); if (unlikely(!__pyx_tuple__7)) __PYX_ERR(0, 84, __pyx_L1_error)
+  __pyx_tuple__7 = PyTuple_Pack(2, __pyx_slice__6, Py_None); if (unlikely(!__pyx_tuple__7)) __PYX_ERR(0, 87, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__7);
   __Pyx_GIVEREF(__pyx_tuple__7);
-  __pyx_tuple__8 = PyTuple_Pack(2, Py_None, __pyx_slice__6); if (unlikely(!__pyx_tuple__8)) __PYX_ERR(0, 84, __pyx_L1_error)
+  __pyx_tuple__8 = PyTuple_Pack(2, Py_None, __pyx_slice__6); if (unlikely(!__pyx_tuple__8)) __PYX_ERR(0, 87, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__8);
   __Pyx_GIVEREF(__pyx_tuple__8);
 
-  /* "tree.pyx":140
+  /* "tree.pyx":143
  *     cdef int _predict_sample(self, np.ndarray sample, dict node):
  *         if node is None:
  *             raise ValueError("Expected a non-None dictionary node")             # <<<<<<<<<<<<<<
  * 
  *         if node.get("leaf"):
  */
-  __pyx_tuple__9 = PyTuple_Pack(1, __pyx_kp_u_Expected_a_non_None_dictionary_n); if (unlikely(!__pyx_tuple__9)) __PYX_ERR(0, 140, __pyx_L1_error)
+  __pyx_tuple__9 = PyTuple_Pack(1, __pyx_kp_u_Expected_a_non_None_dictionary_n); if (unlikely(!__pyx_tuple__9)) __PYX_ERR(0, 143, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__9);
   __Pyx_GIVEREF(__pyx_tuple__9);
 
@@ -9859,38 +10003,38 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GIVEREF(__pyx_tuple__13);
   __pyx_codeobj__14 = (PyObject*)__Pyx_PyCode_New(4, 0, 0, 4, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__13, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_tree_pyx, __pyx_n_s_fit, 30, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__14)) __PYX_ERR(0, 30, __pyx_L1_error)
 
-  /* "tree.pyx":79
+  /* "tree.pyx":82
  *         return {"leaf": True, "class": majority_class}
  * 
  *     cpdef np.float64_t _topological_impurity(self, np.ndarray y, np.ndarray adj_matrix):             # <<<<<<<<<<<<<<
  *         total_samples = len(y)
  *         class_counts = np.bincount(y, minlength=self.n_classes_)
  */
-  __pyx_tuple__15 = PyTuple_Pack(3, __pyx_n_s_self, __pyx_n_s_y, __pyx_n_s_adj_matrix); if (unlikely(!__pyx_tuple__15)) __PYX_ERR(0, 79, __pyx_L1_error)
+  __pyx_tuple__15 = PyTuple_Pack(3, __pyx_n_s_self, __pyx_n_s_y, __pyx_n_s_adj_matrix); if (unlikely(!__pyx_tuple__15)) __PYX_ERR(0, 82, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__15);
   __Pyx_GIVEREF(__pyx_tuple__15);
-  __pyx_codeobj__16 = (PyObject*)__Pyx_PyCode_New(3, 0, 0, 3, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__15, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_tree_pyx, __pyx_n_s_topological_impurity_2, 79, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__16)) __PYX_ERR(0, 79, __pyx_L1_error)
+  __pyx_codeobj__16 = (PyObject*)__Pyx_PyCode_New(3, 0, 0, 3, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__15, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_tree_pyx, __pyx_n_s_topological_impurity_2, 82, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__16)) __PYX_ERR(0, 82, __pyx_L1_error)
 
-  /* "tree.pyx":98
+  /* "tree.pyx":101
  *         return topological_impurity
  * 
  *     cpdef _find_best_split(self, np.ndarray X, np.ndarray y, np.ndarray adj_matrix):             # <<<<<<<<<<<<<<
  *         best_impurity_reduction = float("-inf")
  *         best_split_feature: int|None = None
  */
-  __pyx_codeobj__17 = (PyObject*)__Pyx_PyCode_New(4, 0, 0, 4, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__13, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_tree_pyx, __pyx_n_s_find_best_split, 98, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__17)) __PYX_ERR(0, 98, __pyx_L1_error)
+  __pyx_codeobj__17 = (PyObject*)__Pyx_PyCode_New(4, 0, 0, 4, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__13, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_tree_pyx, __pyx_n_s_find_best_split, 101, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__17)) __PYX_ERR(0, 101, __pyx_L1_error)
 
-  /* "tree.pyx":132
+  /* "tree.pyx":135
  *         return best_split_feature, best_split_value
  * 
  *     cpdef np.ndarray predict(self, np.ndarray X):             # <<<<<<<<<<<<<<
  *         predictions = np.zeros(len(X), dtype=int)
  *         for i, sample in enumerate(X):
  */
-  __pyx_tuple__18 = PyTuple_Pack(2, __pyx_n_s_self, __pyx_n_s_X); if (unlikely(!__pyx_tuple__18)) __PYX_ERR(0, 132, __pyx_L1_error)
+  __pyx_tuple__18 = PyTuple_Pack(2, __pyx_n_s_self, __pyx_n_s_X); if (unlikely(!__pyx_tuple__18)) __PYX_ERR(0, 135, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__18);
   __Pyx_GIVEREF(__pyx_tuple__18);
-  __pyx_codeobj__19 = (PyObject*)__Pyx_PyCode_New(2, 0, 0, 2, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__18, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_tree_pyx, __pyx_n_s_predict, 132, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__19)) __PYX_ERR(0, 132, __pyx_L1_error)
+  __pyx_codeobj__19 = (PyObject*)__Pyx_PyCode_New(2, 0, 0, 2, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__18, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_tree_pyx, __pyx_n_s_predict, 135, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__19)) __PYX_ERR(0, 135, __pyx_L1_error)
 
   /* "(tree fragment)":1
  * def __reduce_cython__(self):             # <<<<<<<<<<<<<<
@@ -10475,7 +10619,7 @@ if (!__Pyx_RefNanny) {
  *                  min_samples_split: int = 2,
  *                  min_samples_leaf: int = 1,             # <<<<<<<<<<<<<<
  *                  min_impurity_reduction: float = 0,
- *                  mol_net_threshold:float = 0.):
+ *                  mol_net_threshold:float = 0.0):
  */
   if (!(likely(__Pyx_Py3Int_CheckExact(__pyx_int_1)) || __Pyx_RaiseUnexpectedTypeError("int", __pyx_int_1))) __PYX_ERR(0, 19, __pyx_L1_error)
   __Pyx_INCREF(__pyx_int_1);
@@ -10495,42 +10639,42 @@ if (!__Pyx_RefNanny) {
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   PyType_Modified(__pyx_ptype_4tree_TopologicalDecisionTreeClassifier);
 
-  /* "tree.pyx":79
+  /* "tree.pyx":82
  *         return {"leaf": True, "class": majority_class}
  * 
  *     cpdef np.float64_t _topological_impurity(self, np.ndarray y, np.ndarray adj_matrix):             # <<<<<<<<<<<<<<
  *         total_samples = len(y)
  *         class_counts = np.bincount(y, minlength=self.n_classes_)
  */
-  __pyx_t_3 = __Pyx_CyFunction_New(&__pyx_mdef_4tree_33TopologicalDecisionTreeClassifier_5_topological_impurity, __Pyx_CYFUNCTION_CCLASS, __pyx_n_s_TopologicalDecisionTreeClassifie_3, NULL, __pyx_n_s_tree, __pyx_d, ((PyObject *)__pyx_codeobj__16)); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 79, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_CyFunction_New(&__pyx_mdef_4tree_33TopologicalDecisionTreeClassifier_5_topological_impurity, __Pyx_CYFUNCTION_CCLASS, __pyx_n_s_TopologicalDecisionTreeClassifie_3, NULL, __pyx_n_s_tree, __pyx_d, ((PyObject *)__pyx_codeobj__16)); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 82, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  if (__Pyx_SetItemOnTypeDict((PyObject *)__pyx_ptype_4tree_TopologicalDecisionTreeClassifier, __pyx_n_s_topological_impurity_2, __pyx_t_3) < 0) __PYX_ERR(0, 79, __pyx_L1_error)
+  if (__Pyx_SetItemOnTypeDict((PyObject *)__pyx_ptype_4tree_TopologicalDecisionTreeClassifier, __pyx_n_s_topological_impurity_2, __pyx_t_3) < 0) __PYX_ERR(0, 82, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   PyType_Modified(__pyx_ptype_4tree_TopologicalDecisionTreeClassifier);
 
-  /* "tree.pyx":98
+  /* "tree.pyx":101
  *         return topological_impurity
  * 
  *     cpdef _find_best_split(self, np.ndarray X, np.ndarray y, np.ndarray adj_matrix):             # <<<<<<<<<<<<<<
  *         best_impurity_reduction = float("-inf")
  *         best_split_feature: int|None = None
  */
-  __pyx_t_3 = __Pyx_CyFunction_New(&__pyx_mdef_4tree_33TopologicalDecisionTreeClassifier_7_find_best_split, __Pyx_CYFUNCTION_CCLASS, __pyx_n_s_TopologicalDecisionTreeClassifie_4, NULL, __pyx_n_s_tree, __pyx_d, ((PyObject *)__pyx_codeobj__17)); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 98, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_CyFunction_New(&__pyx_mdef_4tree_33TopologicalDecisionTreeClassifier_7_find_best_split, __Pyx_CYFUNCTION_CCLASS, __pyx_n_s_TopologicalDecisionTreeClassifie_4, NULL, __pyx_n_s_tree, __pyx_d, ((PyObject *)__pyx_codeobj__17)); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 101, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  if (__Pyx_SetItemOnTypeDict((PyObject *)__pyx_ptype_4tree_TopologicalDecisionTreeClassifier, __pyx_n_s_find_best_split, __pyx_t_3) < 0) __PYX_ERR(0, 98, __pyx_L1_error)
+  if (__Pyx_SetItemOnTypeDict((PyObject *)__pyx_ptype_4tree_TopologicalDecisionTreeClassifier, __pyx_n_s_find_best_split, __pyx_t_3) < 0) __PYX_ERR(0, 101, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   PyType_Modified(__pyx_ptype_4tree_TopologicalDecisionTreeClassifier);
 
-  /* "tree.pyx":132
+  /* "tree.pyx":135
  *         return best_split_feature, best_split_value
  * 
  *     cpdef np.ndarray predict(self, np.ndarray X):             # <<<<<<<<<<<<<<
  *         predictions = np.zeros(len(X), dtype=int)
  *         for i, sample in enumerate(X):
  */
-  __pyx_t_3 = __Pyx_CyFunction_New(&__pyx_mdef_4tree_33TopologicalDecisionTreeClassifier_9predict, __Pyx_CYFUNCTION_CCLASS, __pyx_n_s_TopologicalDecisionTreeClassifie_5, NULL, __pyx_n_s_tree, __pyx_d, ((PyObject *)__pyx_codeobj__19)); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 132, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_CyFunction_New(&__pyx_mdef_4tree_33TopologicalDecisionTreeClassifier_9predict, __Pyx_CYFUNCTION_CCLASS, __pyx_n_s_TopologicalDecisionTreeClassifie_5, NULL, __pyx_n_s_tree, __pyx_d, ((PyObject *)__pyx_codeobj__19)); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 135, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  if (__Pyx_SetItemOnTypeDict((PyObject *)__pyx_ptype_4tree_TopologicalDecisionTreeClassifier, __pyx_n_s_predict, __pyx_t_3) < 0) __PYX_ERR(0, 132, __pyx_L1_error)
+  if (__Pyx_SetItemOnTypeDict((PyObject *)__pyx_ptype_4tree_TopologicalDecisionTreeClassifier, __pyx_n_s_predict, __pyx_t_3) < 0) __PYX_ERR(0, 135, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   PyType_Modified(__pyx_ptype_4tree_TopologicalDecisionTreeClassifier);
 
@@ -11931,6 +12075,128 @@ static CYTHON_INLINE int __Pyx_TypeTest(PyObject *obj, PyTypeObject *type) {
     return 0;
 }
 
+/* PyObjectFormatAndDecref */
+static CYTHON_INLINE PyObject* __Pyx_PyObject_FormatSimpleAndDecref(PyObject* s, PyObject* f) {
+    if (unlikely(!s)) return NULL;
+    if (likely(PyUnicode_CheckExact(s))) return s;
+    #if PY_MAJOR_VERSION < 3
+    if (likely(PyString_CheckExact(s))) {
+        PyObject *result = PyUnicode_FromEncodedObject(s, NULL, "strict");
+        Py_DECREF(s);
+        return result;
+    }
+    #endif
+    return __Pyx_PyObject_FormatAndDecref(s, f);
+}
+static CYTHON_INLINE PyObject* __Pyx_PyObject_FormatAndDecref(PyObject* s, PyObject* f) {
+    PyObject *result;
+    if (unlikely(!s)) return NULL;
+    result = PyObject_Format(s, f);
+    Py_DECREF(s);
+    return result;
+}
+
+/* PyObjectCallOneArg */
+static CYTHON_INLINE PyObject* __Pyx_PyObject_CallOneArg(PyObject *func, PyObject *arg) {
+    PyObject *args[2] = {NULL, arg};
+    return __Pyx_PyObject_FastCall(func, args+1, 1 | __Pyx_PY_VECTORCALL_ARGUMENTS_OFFSET);
+}
+
+/* PyIntBinop */
+#if !CYTHON_COMPILING_IN_PYPY
+static PyObject* __Pyx_PyInt_TrueDivideObjC(PyObject *op1, PyObject *op2, long intval, int inplace, int zerodivision_check) {
+    CYTHON_MAYBE_UNUSED_VAR(intval);
+    CYTHON_MAYBE_UNUSED_VAR(inplace);
+    CYTHON_UNUSED_VAR(zerodivision_check);
+    #if PY_MAJOR_VERSION < 3
+    if (likely(PyInt_CheckExact(op1))) {
+        const long b = intval;
+        long a = PyInt_AS_LONG(op1);
+        
+            if (8 * sizeof(long) <= 53 || likely(labs(a) <= ((PY_LONG_LONG)1 << 53))) {
+                return PyFloat_FromDouble((double)a / (double)b);
+            }
+            return PyInt_Type.tp_as_number->nb_true_divide(op1, op2);
+    }
+    #endif
+    #if CYTHON_USE_PYLONG_INTERNALS
+    if (likely(PyLong_CheckExact(op1))) {
+        const long b = intval;
+        long a, x;
+        if (unlikely(__Pyx_PyLong_IsZero(op1))) {
+        }
+        if (likely(__Pyx_PyLong_IsCompact(op1))) {
+            a = __Pyx_PyLong_CompactValue(op1);
+        } else {
+            const digit* digits = __Pyx_PyLong_Digits(op1);
+            const Py_ssize_t size = __Pyx_PyLong_SignedDigitCount(op1);
+            switch (size) {
+                case -2:
+                    if (8 * sizeof(long) - 1 > 2 * PyLong_SHIFT && 1 * PyLong_SHIFT < 53) {
+                        a = -(long) (((((unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0]));
+                        break;
+                    }
+                    CYTHON_FALLTHROUGH;
+                case 2:
+                    if (8 * sizeof(long) - 1 > 2 * PyLong_SHIFT && 1 * PyLong_SHIFT < 53) {
+                        a = (long) (((((unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0]));
+                        break;
+                    }
+                    CYTHON_FALLTHROUGH;
+                case -3:
+                    if (8 * sizeof(long) - 1 > 3 * PyLong_SHIFT && 2 * PyLong_SHIFT < 53) {
+                        a = -(long) (((((((unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0]));
+                        break;
+                    }
+                    CYTHON_FALLTHROUGH;
+                case 3:
+                    if (8 * sizeof(long) - 1 > 3 * PyLong_SHIFT && 2 * PyLong_SHIFT < 53) {
+                        a = (long) (((((((unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0]));
+                        break;
+                    }
+                    CYTHON_FALLTHROUGH;
+                case -4:
+                    if (8 * sizeof(long) - 1 > 4 * PyLong_SHIFT && 3 * PyLong_SHIFT < 53) {
+                        a = -(long) (((((((((unsigned long)digits[3]) << PyLong_SHIFT) | (unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0]));
+                        break;
+                    }
+                    CYTHON_FALLTHROUGH;
+                case 4:
+                    if (8 * sizeof(long) - 1 > 4 * PyLong_SHIFT && 3 * PyLong_SHIFT < 53) {
+                        a = (long) (((((((((unsigned long)digits[3]) << PyLong_SHIFT) | (unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0]));
+                        break;
+                    }
+                    CYTHON_FALLTHROUGH;
+                default: return PyLong_Type.tp_as_number->nb_true_divide(op1, op2);
+            }
+        }
+                if ((8 * sizeof(long) <= 53 || likely(labs(a) <= ((PY_LONG_LONG)1 << 53)))
+                        || __Pyx_PyLong_DigitCount(op1) <= 52 / PyLong_SHIFT) {
+                    return PyFloat_FromDouble((double)a / (double)b);
+                }
+                return PyLong_Type.tp_as_number->nb_true_divide(op1, op2);
+            return PyLong_FromLong(x);
+        
+    }
+    #endif
+    if (PyFloat_CheckExact(op1)) {
+        const long b = intval;
+#if CYTHON_COMPILING_IN_LIMITED_API
+        double a = __pyx_PyFloat_AsDouble(op1);
+#else
+        double a = PyFloat_AS_DOUBLE(op1);
+#endif
+            double result;
+            
+            PyFPE_START_PROTECT("divide", return NULL)
+            result = ((double)a) / (double)b;
+            PyFPE_END_PROTECT(result)
+            return PyFloat_FromDouble(result);
+    }
+    return (inplace ? PyNumber_InPlaceTrueDivide : PyNumber_TrueDivide)(op1, op2);
+}
+#endif
+
 /* CIntToDigits */
 static const char DIGIT_PAIRS_10[2*10*10+1] = {
     "00010203040506070809"
@@ -12308,12 +12574,6 @@ static CYTHON_INLINE PyObject *__Pyx_GetItemInt_Fast(PyObject *o, Py_ssize_t i, 
     return __Pyx_GetItemInt_Generic(o, PyInt_FromSsize_t(i));
 }
 
-/* PyObjectCallOneArg */
-static CYTHON_INLINE PyObject* __Pyx_PyObject_CallOneArg(PyObject *func, PyObject *arg) {
-    PyObject *args[2] = {NULL, arg};
-    return __Pyx_PyObject_FastCall(func, args+1, 1 | __Pyx_PY_VECTORCALL_ARGUMENTS_OFFSET);
-}
-
 /* ObjectGetItem */
 #if CYTHON_USE_TYPE_SLOTS
 static PyObject *__Pyx_PyObject_GetIndex(PyObject *obj, PyObject *index) {
@@ -12361,101 +12621,6 @@ static PyObject *__Pyx_PyObject_GetItem(PyObject *obj, PyObject *key) {
         return __Pyx_PyObject_GetIndex(obj, key);
     }
     return __Pyx_PyObject_GetItem_Slow(obj, key);
-}
-#endif
-
-/* PyIntBinop */
-#if !CYTHON_COMPILING_IN_PYPY
-static PyObject* __Pyx_PyInt_TrueDivideObjC(PyObject *op1, PyObject *op2, long intval, int inplace, int zerodivision_check) {
-    CYTHON_MAYBE_UNUSED_VAR(intval);
-    CYTHON_MAYBE_UNUSED_VAR(inplace);
-    CYTHON_UNUSED_VAR(zerodivision_check);
-    #if PY_MAJOR_VERSION < 3
-    if (likely(PyInt_CheckExact(op1))) {
-        const long b = intval;
-        long a = PyInt_AS_LONG(op1);
-        
-            if (8 * sizeof(long) <= 53 || likely(labs(a) <= ((PY_LONG_LONG)1 << 53))) {
-                return PyFloat_FromDouble((double)a / (double)b);
-            }
-            return PyInt_Type.tp_as_number->nb_true_divide(op1, op2);
-    }
-    #endif
-    #if CYTHON_USE_PYLONG_INTERNALS
-    if (likely(PyLong_CheckExact(op1))) {
-        const long b = intval;
-        long a, x;
-        if (unlikely(__Pyx_PyLong_IsZero(op1))) {
-        }
-        if (likely(__Pyx_PyLong_IsCompact(op1))) {
-            a = __Pyx_PyLong_CompactValue(op1);
-        } else {
-            const digit* digits = __Pyx_PyLong_Digits(op1);
-            const Py_ssize_t size = __Pyx_PyLong_SignedDigitCount(op1);
-            switch (size) {
-                case -2:
-                    if (8 * sizeof(long) - 1 > 2 * PyLong_SHIFT && 1 * PyLong_SHIFT < 53) {
-                        a = -(long) (((((unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0]));
-                        break;
-                    }
-                    CYTHON_FALLTHROUGH;
-                case 2:
-                    if (8 * sizeof(long) - 1 > 2 * PyLong_SHIFT && 1 * PyLong_SHIFT < 53) {
-                        a = (long) (((((unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0]));
-                        break;
-                    }
-                    CYTHON_FALLTHROUGH;
-                case -3:
-                    if (8 * sizeof(long) - 1 > 3 * PyLong_SHIFT && 2 * PyLong_SHIFT < 53) {
-                        a = -(long) (((((((unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0]));
-                        break;
-                    }
-                    CYTHON_FALLTHROUGH;
-                case 3:
-                    if (8 * sizeof(long) - 1 > 3 * PyLong_SHIFT && 2 * PyLong_SHIFT < 53) {
-                        a = (long) (((((((unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0]));
-                        break;
-                    }
-                    CYTHON_FALLTHROUGH;
-                case -4:
-                    if (8 * sizeof(long) - 1 > 4 * PyLong_SHIFT && 3 * PyLong_SHIFT < 53) {
-                        a = -(long) (((((((((unsigned long)digits[3]) << PyLong_SHIFT) | (unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0]));
-                        break;
-                    }
-                    CYTHON_FALLTHROUGH;
-                case 4:
-                    if (8 * sizeof(long) - 1 > 4 * PyLong_SHIFT && 3 * PyLong_SHIFT < 53) {
-                        a = (long) (((((((((unsigned long)digits[3]) << PyLong_SHIFT) | (unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0]));
-                        break;
-                    }
-                    CYTHON_FALLTHROUGH;
-                default: return PyLong_Type.tp_as_number->nb_true_divide(op1, op2);
-            }
-        }
-                if ((8 * sizeof(long) <= 53 || likely(labs(a) <= ((PY_LONG_LONG)1 << 53)))
-                        || __Pyx_PyLong_DigitCount(op1) <= 52 / PyLong_SHIFT) {
-                    return PyFloat_FromDouble((double)a / (double)b);
-                }
-                return PyLong_Type.tp_as_number->nb_true_divide(op1, op2);
-            return PyLong_FromLong(x);
-        
-    }
-    #endif
-    if (PyFloat_CheckExact(op1)) {
-        const long b = intval;
-#if CYTHON_COMPILING_IN_LIMITED_API
-        double a = __pyx_PyFloat_AsDouble(op1);
-#else
-        double a = PyFloat_AS_DOUBLE(op1);
-#endif
-            double result;
-            
-            PyFPE_START_PROTECT("divide", return NULL)
-            result = ((double)a) / (double)b;
-            PyFPE_END_PROTECT(result)
-            return PyFloat_FromDouble(result);
-    }
-    return (inplace ? PyNumber_InPlaceTrueDivide : PyNumber_TrueDivide)(op1, op2);
 }
 #endif
 
