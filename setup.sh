@@ -1,9 +1,5 @@
 #!/bin/bash
 
-# Clone the GitHub repository
-git clone https://github.com/Manas02/topologicalimpurity.git
-cd topologicalimpurity/
-
 # install packages
 poetry install 
 # Install the Python package
@@ -32,5 +28,5 @@ if [[ "$response" == "yes" ]]; then
     poetry run python benchmark.py 
     poetry run python benchmark_rf.py 
 else
-    echo "Install Done. Head over to `benchmark/`."
+    echo "Install Done."
 fi
