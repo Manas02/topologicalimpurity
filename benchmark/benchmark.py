@@ -22,11 +22,11 @@ def evaluate_models(dataset_name, sim_threshold, molnet_fp,
                     model_fp, X_train, y_train, 
                     A_train, X_test, y_test):
     
-    topo_clf = TopologicalDecisionTreeClassifier(max_depth=50)
+    topo_clf = TopologicalDecisionTreeClassifier(max_depth=25, min_samples_leaf=3)
     topo_clf.fit(X_train, y_train, A_train)
 
     # Train DecisionTreeClassifier
-    clf = DecisionTreeClassifier()
+    clf = DecisionTreeClassifier(random_state=69420)
     clf.fit(X_train, y_train)
 
     # Make predictions
@@ -42,16 +42,16 @@ def evaluate_models(dataset_name, sim_threshold, molnet_fp,
         "Molecular_network_Fingeprint": molnet_fp,
         "Model_Fingeprint": model_fp,
         "Topological_Decision_Tree_Accuracy": accuracy_score(y_test, topo_pred),
-        "Topological_Decision_Tree_Precision": precision_score(y_test, topo_pred),
-        "Topological_Decision_Tree_Recall": recall_score(y_test, topo_pred),
-        "Topological_Decision_Tree_Balanced_Accuracy": balanced_accuracy_score(y_test, topo_pred),
-        "Topological_Decision_Tree_F1_Score": f1_score(y_test, topo_pred),
-        "Topological_Decision_Tree_AUC_ROC": roc_auc_score(y_test, topo_pred),
         "Decision_Tree_Accuracy": accuracy_score(y_test, pred),
+        "Topological_Decision_Tree_Precision": precision_score(y_test, topo_pred),
         "Decision_Tree_Precision": precision_score(y_test, pred),
+        "Topological_Decision_Tree_Recall": recall_score(y_test, topo_pred),
         "Decision_Tree_Recall": recall_score(y_test, pred),
+        "Topological_Decision_Tree_Balanced_Accuracy": balanced_accuracy_score(y_test, topo_pred),
         "Decision_Tree_Balanced_Accuracy": balanced_accuracy_score(y_test, pred),
+        "Topological_Decision_Tree_F1_Score": f1_score(y_test, topo_pred),
         "Decision_Tree_F1_Score": f1_score(y_test, pred),
+        "Topological_Decision_Tree_AUC_ROC": roc_auc_score(y_test, topo_pred),
         "Decision_Tree_AUC_ROC": roc_auc_score(y_test, pred)
     }
 

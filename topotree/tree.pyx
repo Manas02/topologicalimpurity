@@ -78,7 +78,7 @@ cdef class TopologicalDecisionTreeClassifier:
 
     cpdef np.float64_t _topological_impurity(self, np.ndarray y, np.ndarray adj_matrix):
         total_samples = len(y)
-        class_counts = np.bincount(y)
+        class_counts = np.bincount(y, minlength=self.n_classes_)
 
         # Count edges between different classes using vectorized operation 
         edges_between_classes = np.sum(adj_matrix * (y[:, None] != y[None, :])) / 2
