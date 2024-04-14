@@ -26,6 +26,7 @@ done
 if [[ "$response" == "yes" ]]; then
     echo "Starting benchmarks [This will take a very long time]..."
     poetry run python benchmark.py 
+    poetry run python benchmark_tdc.py 
     poetry run python benchmark_rf.py 
 else
     echo "Install Done."

@@ -24,7 +24,7 @@ def evaluate_models(dataset_name, sim_threshold, molnet_fp,
                     model_fp, X_train, y_train, 
                     A_train, X_test, y_test):
     
-    topo_clf = TopologicalRandomForest(max_depth=15, mol_net_threshold=sim_threshold, n_trees=100, random_state=69420)
+    topo_clf = TopologicalRandomForest(max_depth=15, n_trees=100, random_state=69420)
     topo_clf.fit(X_train, y_train, A_train)
 
     # Train DecisionTreeClassifier
@@ -105,4 +105,4 @@ for model_fp in ["maccs",  "morgan2"]:
             metrics_df = pd.DataFrame(all_metrics)
 
             # Save the metrics to a CSV file
-            metrics_df.to_csv('tdc_adme_results_tree.csv', index=False)
+            metrics_df.to_csv('tdc_adme_results_tree_one_rf.csv', index=False)
