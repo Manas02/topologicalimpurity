@@ -20,11 +20,11 @@ logger.add(sys.stdout, level="INFO")  # Add stdout with INFO level
 
 
 # Define a function to evaluate the models and store metrics
-def evaluate_models(dataset_name, sim_threshold, molnet_fp, 
+def evaluate_models(dataset_name, molnet_fp, 
                     model_fp, X_train, y_train, 
                     A_train, X_test, y_test):
     
-    topo_clf = TopologicalRandomForest(max_depth=15, n_trees=100, random_state=69420)
+    topo_clf = TopologicalRandomForest(max_depth=25, n_trees=100, random_state=69420)
     topo_clf.fit(X_train, y_train, A_train)
 
     # Train DecisionTreeClassifier
@@ -38,7 +38,6 @@ def evaluate_models(dataset_name, sim_threshold, molnet_fp,
     # Calculate evaluation metrics
     metrics = {
         "Dataset": dataset_name,
-        "Sim_threshold": sim_threshold,
         "Molecular_network_Fingeprint": molnet_fp,
         "Model_Fingeprint": model_fp,
         "Topological_Random_Forest_Accuracy": accuracy_score(y_test, topo_pred),
@@ -90,19 +89,18 @@ for model_fp in ["maccs",  "morgan2"]:
         y_test = np.array([int(float(test_graph.nodes[i]['categorical_label'])) for i in test_graph.nodes])
         logger.critical(f'DATA DONE...{file_name}|{model_fp=}|{molnet_fp=}')
         
-        for sim_threshold in [0.5, 0.7, 0.9, 0.95]:
-            # Evaluate models and store metrics
-            dataset_name = os.path.splitext(file_name)[0]
+        # Evaluate models and store metrics
+        dataset_name = os.path.splitext(file_name)[0]
 
-            # Evaluate models    
-            logger.critical(f'STARTING EVAL...{file_name}|{model_fp=}|{molnet_fp=}|{sim_threshold=}')
-            metrics = evaluate_models(dataset_name, sim_threshold, molnet_fp, model_fp, X_train, y_train, A_train, X_test, y_test)
-            logger.critical(f'EVAL DONE...{file_name}|{model_fp=}|{molnet_fp=}|{sim_threshold=}')
-            # Append metrics to the list
-            all_metrics.append(metrics)
+        # Evaluate models    
+        logger.critical(f'STARTING EVAL...{file_name}|{model_fp=}|{molnet_fp=}')
+        metrics = evaluate_models(dataset_name, molnet_fp, model_fp, X_train, y_train, A_train, X_test, y_test)
+        logger.critical(f'EVAL DONE...{file_name}|{model_fp=}|{molnet_fp=}')
+        # Append metrics to the list
+        all_metrics.append(metrics)
 
-            # Convert the list of dictionaries to a DataFrame
-            metrics_df = pd.DataFrame(all_metrics)
+        # Convert the list of dictionaries to a DataFrame
+        metrics_df = pd.DataFrame(all_metrics)
 
-            # Save the metrics to a CSV file
-            metrics_df.to_csv('tdc_adme_results_tree_one_rf.csv', index=False)
+        # Save the metrics to a CSV file
+        metrics_df.to_csv('tdc_adme_results_tree_one_rf.csv', index=False)
