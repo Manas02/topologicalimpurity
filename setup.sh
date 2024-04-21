@@ -1,5 +1,3 @@
-#!/bin/bash
-
 # install packages
 poetry install 
 # Install the Python package

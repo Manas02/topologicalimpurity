@@ -7,7 +7,6 @@
 curl -sSL https://install.python-poetry.org | python3 -
 ```
 
-
 # Paste this on your terminal to get started
 ```sh
 # Clone the GitHub repository
