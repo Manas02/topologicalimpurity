@@ -91,31 +91,31 @@ all_metrics = []
 
 if __name__ == "__main__":
     # Iterate over each dataset file in the data folder
-    sim_threshold = 0.4 # Don't change this
-    molnet_fp = "morgan2" # Maybe try morgan3, maccs
+    sim_threshold = 0.4 # Base molnet threshold; Don't change
 
-    for file_name in tqdm(os.listdir(data_folder)[3:], leave=False, desc="Dataset"):
-        if file_name.endswith('.csv'):
-            # Load dataset
-            df = pd.read_csv(os.path.join(data_folder, file_name))
-            # Extract features and labels
-            for model_fp in ["maccs",  "morgan2"]:
-                logger.info(f'{file_name[:-4]}|{model_fp=}|{molnet_fp=}')
+    for model_fp in ["rdkit", "maccs", "morgan2", "morgan3"]:
+        for molnet_fp in ["rdkit", "maccs", "morgan2", "morgan3"]:
+            for file_name in tqdm(os.listdir(data_folder), leave=False, desc="Dataset"):
+                if file_name.endswith('.csv'):
+                    # Load dataset
+                    df = pd.read_csv(os.path.join(data_folder, file_name))
 
-                (X_train, y_train, A_train, X_test, y_test) = preprocess_data(df, sim_threshold, molnet_fp, model_fp)
+                    logger.info(f'{file_name[:-4]}|{model_fp=}|{molnet_fp=}')
 
-                # Evaluate models and store metrics
-                dataset_name = os.path.splitext(file_name)[0]
+                    (X_train, y_train, A_train, X_test, y_test) = preprocess_data(df, sim_threshold, molnet_fp, model_fp)
 
-                for run in range(3):
-                    # Evaluate models
-                    metrics = evaluate_models(dataset_name, run, molnet_fp, model_fp, X_train, y_train, A_train, X_test, y_test)
+                    # Evaluate models and store metrics
+                    dataset_name = os.path.splitext(file_name)[0]
 
-                    # Append metrics to the list
-                    all_metrics.append(metrics)
+                    for run in range(3):
+                        # Evaluate models
+                        metrics = evaluate_models(dataset_name, run, molnet_fp, model_fp, X_train, y_train, A_train, X_test, y_test)
 
-                    # Convert the list of dictionaries to a DataFrame
-                    metrics_df = pd.DataFrame(all_metrics)
+                        # Append metrics to the list
+                        all_metrics.append(metrics)
 
-                    # Save the metrics to a CSV file
-                    metrics_df.to_csv('results_rf.csv', index=False)
+                        # Convert the list of dictionaries to a DataFrame
+                        metrics_df = pd.DataFrame(all_metrics)
+
+                        # Save the metrics to a CSV file
+                        metrics_df.to_csv('benchmark_simpd_trf_result.csv', index=False)

@@ -88,13 +88,13 @@ data_folder = '../data/simpd'
 all_metrics = []
 
 # Iterate over each dataset file in the data folder
-for file_name in tqdm(os.listdir(data_folder)[3:], leave=False, desc="Dataset"):
+for file_name in tqdm(os.listdir(data_folder), leave=False, desc="Dataset"):
     if file_name.endswith('.csv'):
         # Load dataset
         df = pd.read_csv(os.path.join(data_folder, file_name))
         # Extract features and labels
-        for model_fp in tqdm(["maccs",  "morgan2"], leave=False, desc="Model Fingerprint"):
-            for molnet_fp in tqdm(["maccs", "morgan2"], leave=False, desc="Molecularnet Fingerprint"):
+        for model_fp in ["rdkit", "maccs", "morgan2", "morgan3"]:
+            for molnet_fp in ["rdkit", "maccs", "morgan2", "morgan3"]:
                 (X_train, y_train, A_train, X_test, y_test) = preprocess_data(df, 0.4, molnet_fp, model_fp)
                 for sim_threshold in tqdm([0.5, 0.7, 0.9, 0.95], leave=False, desc="Similarity Threshold"):
                     logger.info(f'{file_name[:-4]}|{model_fp=}|{molnet_fp=}|{sim_threshold=}')
@@ -112,4 +112,4 @@ for file_name in tqdm(os.listdir(data_folder)[3:], leave=False, desc="Dataset"):
                     metrics_df = pd.DataFrame(all_metrics)
 
                     # Save the metrics to a CSV file
-                    metrics_df.to_csv('results_tree.csv', index=False)
+                    metrics_df.to_csv('benchmark_simpd_tdt_result.csv', index=False)

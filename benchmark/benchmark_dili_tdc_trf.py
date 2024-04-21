@@ -24,7 +24,7 @@ def evaluate_models(dataset_name, molnet_fp,
                     model_fp, X_train, y_train, 
                     A_train, X_test, y_test):
     
-    topo_clf = TopologicalRandomForest(max_depth=25, n_trees=100, random_state=69420)
+    topo_clf = TopologicalRandomForest(max_depth=25, max_features=200, n_trees=100, random_state=69420)
     topo_clf.fit(X_train, y_train, A_train)
 
     # Train DecisionTreeClassifier
@@ -73,8 +73,8 @@ train_smiles_list = train_df["Drug"].values
 train_classes = train_df["Y"].values
 test_smiles_list = test_df["Drug"].values
 test_classes = test_df["Y"].values
-for model_fp in ["maccs",  "morgan2"]:
-    for molnet_fp in ["maccs", "morgan2"]:
+for model_fp in ["rdkit", "maccs", "morgan2", "morgan3"]:
+    for molnet_fp in ["rdkit", "maccs", "morgan2", "morgan3"]:
         logger.info(f'DATA PREP...{file_name}|{model_fp=}|{molnet_fp=}')
         network = MolecularNetwork(descriptor=molnet_fp, sim_metric="tanimoto", sim_threshold=0.4, node_descriptor=model_fp)
         graph = network.create_graph(train_smiles_list, train_classes)
@@ -103,4 +103,4 @@ for model_fp in ["maccs",  "morgan2"]:
         metrics_df = pd.DataFrame(all_metrics)
 
         # Save the metrics to a CSV file
-        metrics_df.to_csv('tdc_adme_results_tree_one_rf.csv', index=False)
+        metrics_df.to_csv('benchmark_dili_tdc_trf_result.csv', index=False)

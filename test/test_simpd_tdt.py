@@ -112,4 +112,4 @@ if __name__ == "__main__":
     metrics_df = pd.DataFrame(all_metrics)
 
     # Save the metrics to a CSV file
-    metrics_df.to_csv('results_tree_one.csv', index=False)
+    metrics_df.to_csv('test_simpd_tdt_result.csv', index=False)

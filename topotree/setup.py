@@ -16,10 +16,10 @@ setup(
     name='topotree',
     version='0.1.0',
     description='Topological Decision Tree and Random Forest Package',
-    author='Your Name',
-    author_email='your.email@example.com',
+    author='Manas Mahale',
+    author_email='manas.mahale@bcp.edu.in',
     url='https://github.com/Manas02/topologicalimpurity',
-    packages=find_packages(),  # Automatically finds all packages in the project
+    packages=find_packages(), 
     ext_modules=cythonize(ext_modules,
                          compiler_directives={'language_level': "3"}),  # Compile Cython files
     classifiers=[
