@@ -1,3 +1,6 @@
+conda create -n topoinfo python=3.12 --yes
+conda activate topoinfo
+
 # install packages
 poetry install 
 # Install the Python package
