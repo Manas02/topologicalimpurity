@@ -5,13 +5,14 @@ from topotree import TopologicalDecisionTreeClassifier
 
 
 class TopologicalRandomForest:
-    def __init__(self, n_trees=100, max_depth=None, max_features=None,random_state=None):
+    def __init__(self, n_trees=100, n_jobs=8, max_depth=None, max_features=None,random_state=None):
         """
         Initialize the Random Forest.
 
         Args:
             tree_class: The custom decision tree class you want to use in the Random Forest.
             n_trees: Number of trees in the Random Forest.
+            n_jobs: 8
             max_depth: Maximum depth of each tree in the Random Forest.
             random_state: Seed for random number generator.
         """
