@@ -28,6 +28,34 @@ logger.remove()  # Remove any previous configurations
 logger.add(sys.stdout, level="INFO")  # Add stdout with INFO level
 
 
+def calculate_percent_activity_cliffs(adj_matrix, y):
+    """
+    Calculate the percentage of activity cliffs in the given adjacency matrix.
+
+    Parameters:
+    adj_matrix (np.ndarray): Adjacency matrix representing the molecular network.
+    y (np.ndarray): Array of class labels for the nodes.
+
+    Returns:
+    float: Percentage of activity cliffs.
+    """
+    n_samples = len(y)
+    assert adj_matrix.shape == (n_samples, n_samples), "Adjacency matrix shape does not match the number of samples."
+
+    # Count edges between different classes
+    different_class_edges = np.sum(adj_matrix * (y[:, None] != y[None, :])) / 2
+
+    # Total number of edges in the adjacency matrix
+    total_edges = adj_matrix.sum() / 2
+
+    # Avoid division by zero
+    if total_edges == 0:
+        return 0.0
+
+    percent_activity_cliffs = (different_class_edges / total_edges) * 100
+    return percent_activity_cliffs
+
+
 # Define a function to evaluate the models and store metrics
 def evaluate_models(
     dataset_name,
@@ -39,6 +67,7 @@ def evaluate_models(
     A_train,
     X_test,
     y_test,
+    A_test
 ):
 
     topo_clf = TopologicalDecisionTreeClassifier(
@@ -46,6 +75,9 @@ def evaluate_models(
     )
     clf_tree = topo_clf.fit(X_train, y_train, A_train)
     dump(clf_tree, "dili.joblib")
+
+    percent_activity_cliff_train = calculate_percent_activity_cliffs(A_train, y_train)
+    percent_activity_cliff_test = calculate_percent_activity_cliffs(A_test, y_test)
 
     # Train DecisionTreeClassifier
     clf = DecisionTreeClassifier(random_state=69420)
@@ -58,6 +90,8 @@ def evaluate_models(
     # Calculate evaluation metrics
     metrics = {
         "Dataset": dataset_name,
+        "Percent_Activity_Cliff_train":percent_activity_cliff_train,
+        "Percent_Activity_Cliff_test":percent_activity_cliff_test,
         "Sim_threshold": sim_threshold,
         "Molecular_network_Fingeprint": molnet_fp,
         "Model_Fingeprint": model_fp,
@@ -130,6 +164,8 @@ for model_fp in ["rdkit", "maccs", "morgan2", "morgan3"]:
                     for i in test_graph.nodes
                 ]
             )
+            A_test = nx.adjacency_matrix(test_graph, weight="similarity").toarray()
+
             logger.critical(f"DATA DONE...{file_name}|{model_fp=}|{molnet_fp=}")
             # Evaluate models and store metrics
             dataset_name = os.path.splitext(file_name)[0]
@@ -148,6 +184,7 @@ for model_fp in ["rdkit", "maccs", "morgan2", "morgan3"]:
                 A_train,
                 X_test,
                 y_test,
+                A_test
             )
             logger.critical(
                 f"EVAL DONE...{file_name}|{model_fp=}|{molnet_fp=}|{sim_threshold=}"

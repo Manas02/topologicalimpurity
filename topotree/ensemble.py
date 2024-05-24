@@ -5,14 +5,14 @@ from topotree import TopologicalDecisionTreeClassifier
 
 
 class TopologicalRandomForest:
-    def __init__(self, n_trees=100, n_jobs=8, max_depth=None, max_features=None,random_state=None):
+    def __init__(self, n_trees=100, n_jobs=6, max_depth=None, max_features=None,random_state=None):
         """
         Initialize the Random Forest.
 
         Args:
             tree_class: The custom decision tree class you want to use in the Random Forest.
             n_trees: Number of trees in the Random Forest.
-            n_jobs: 8
+            n_jobs: 6
             max_depth: Maximum depth of each tree in the Random Forest.
             random_state: Seed for random number generator.
         """
@@ -20,6 +20,7 @@ class TopologicalRandomForest:
         self.max_depth = max_depth
         self.random_state = random_state
         self.max_features = max_features
+        self.n_jobs = n_jobs
         self.trees = []
 
         # Set the random seed if provided
@@ -61,7 +62,7 @@ class TopologicalRandomForest:
             return tree, selected_features
 
         # Parallelize training each decision tree on a bootstrap sample using pqdm
-        trained_trees = pqdm(range(self.n_trees), train_tree, n_jobs=min(self.n_trees, 6), desc="Training Trees", argument_type='index')
+        trained_trees = pqdm(range(self.n_trees), train_tree, n_jobs=self.n_jobs, desc="Training Trees", argument_type='index')
 
         # Append the trained trees and their selected features to the list of trees
         for tree, selected_features in trained_trees:
