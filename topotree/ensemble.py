@@ -26,7 +26,7 @@ class TopologicalRandomForest:
         # Set the random seed if provided
         if self.random_state is not None:
             np.random.seed(self.random_state)
-
+            
     def fit(self, X, y, adj_matrix):
         """
         Fit the Random Forest to the training data.
@@ -94,7 +94,7 @@ class TopologicalRandomForest:
             else:
                 X_sub = X
             tree_predictions[:, i] = tree.predict(X_sub)
-
+		
         # Aggregate predictions to find the majority class
         final_predictions = np.array([self.count_classes(pred) for pred in tree_predictions])
         return final_predictions

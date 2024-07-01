@@ -25,6 +25,7 @@ numba = "^0.59.1"
 cython = "^3.0.10"
 pqdm = "^0.2.0"
 setuptools = "^69.5.1"
+notebook = "^7.2.1"
 
 [build-system]
 requires = ["poetry-core"]

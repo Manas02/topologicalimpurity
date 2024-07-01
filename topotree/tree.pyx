@@ -14,12 +14,13 @@ cdef class TopologicalDecisionTreeClassifier:
     cdef np.ndarray classes_
     cdef int n_classes_
 
-    def __init__(self, max_depth: int = -1, 
+
+    def __init__(self, max_depth: int = -1,
                  min_samples_split: int = 2,
-                 min_samples_leaf: int = 1, 
+                 min_samples_leaf: int = 1,
                  min_impurity_reduction: float = 0,
                  mol_net_threshold:float = 0.0):
-        
+
         self.max_depth = max_depth
         self.min_samples_split = min_samples_split
         self.min_samples_leaf = min_samples_leaf
@@ -34,15 +35,15 @@ cdef class TopologicalDecisionTreeClassifier:
         assert self.n_classes_ >= 2, f"At least 2 classes should be present in categorical label (y), only {self.n_classes_} found"
         self.tree_ = self._build_tree(X, y, adj_matrix, depth=0)
         return self.tree_
-    
+
     cdef dict _build_tree(self, np.ndarray X, np.ndarray y, np.ndarray  adj_matrix, int depth):
-        best_split_feature: Union[int, None] = None 
+        best_split_feature: Union[int, None] = None
         best_split_value: Union[float, None] = None
         topo_impurity = self._topological_impurity(y, adj_matrix)
         p_act = (y == 1).sum()/len(y)
 
-        if (depth == self.max_depth or 
-            len(np.unique(y)) == 1 or 
+        if (depth == self.max_depth or
+            len(np.unique(y)) == 1 or
             len(y) <= self.min_samples_split):
             leaf_node = self._create_leaf_node(y)
             leaf_node['topological_impurity'] = topo_impurity
@@ -62,13 +63,12 @@ cdef class TopologicalDecisionTreeClassifier:
         left_tree = self._build_tree(X[left_indices], y[left_indices], adj_matrix[left_indices][:, left_indices], depth + 1)
         right_tree = self._build_tree(X[right_indices], y[right_indices], adj_matrix[right_indices][:, right_indices], depth + 1)
 
-        return {'split_feature': best_split_feature, 
-                'split_value': best_split_value, 
-                'left': left_tree, 
+        return {'split_feature': best_split_feature,
+                'split_value': best_split_value,
+                'left': left_tree,
                 'right': right_tree,
                 'topological_impurity': topo_impurity,
                 'P_active': p_act}
-    
 
     cdef dict _create_leaf_node(self, np.ndarray y):
         assert y.shape[0] > 0, "y is empty, how to create a leaf node with no data?"
@@ -80,13 +80,13 @@ cdef class TopologicalDecisionTreeClassifier:
         total_samples = len(y)
         class_counts = np.bincount(y, minlength=self.n_classes_)
 
-        # Count edges between different classes using vectorized operation 
+        # Count edges between different classes using vectorized operation
         edges_between_classes = np.sum(adj_matrix * (y[:, None] != y[None, :])) / 2
         # Compute the product of class proportions
         class_proportions_product = np.prod(class_counts / total_samples)
         # Total number of edges in the graph
         total_edges = adj_matrix.sum() / 2
-        
+
         # Avoid ZeroDivisionError
         if total_edges == 0:
             return class_proportions_product
@@ -97,7 +97,7 @@ cdef class TopologicalDecisionTreeClassifier:
 
     cpdef _find_best_split(self, np.ndarray X, np.ndarray y, np.ndarray adj_matrix):
         best_impurity_reduction = float("-inf")
-        best_split_feature: int|None = None 
+        best_split_feature: int|None = None
         best_split_value: float|None = None
         parent_impurity = self._topological_impurity(y, adj_matrix)
 
@@ -110,7 +110,7 @@ cdef class TopologicalDecisionTreeClassifier:
                 left_indices = X[:, feature] <= split_value
                 right_indices = ~left_indices
 
-                if (left_indices.sum() < self.min_samples_leaf or 
+                if (left_indices.sum() < self.min_samples_leaf or
                     right_indices.sum() < self.min_samples_leaf):
                     continue
 
@@ -120,27 +120,36 @@ cdef class TopologicalDecisionTreeClassifier:
                 child_impurity = left_indices.sum() / len(y) * left_impurity + right_indices.sum() / len(y) * right_impurity
                 impurity_reduction = parent_impurity - child_impurity # max this
 
-                if (impurity_reduction > best_impurity_reduction and 
+                if (impurity_reduction > best_impurity_reduction and
                     impurity_reduction > self.min_impurity_reduction):
-                
+
                     best_impurity_reduction = impurity_reduction
                     best_split_feature = feature
                     best_split_value = split_value
 
         return best_split_feature, best_split_value
 
-    cpdef np.ndarray predict(self, np.ndarray X):
-        predictions = np.zeros(len(X), dtype=int)
+
+    cpdef np.ndarray predict_proba(self, np.ndarray X):
+        proba = np.zeros((len(X), self.n_classes_), dtype=int)
         for i, sample in enumerate(X):
-            predictions[i] = self._predict_sample(sample, self.tree_)
-        return predictions
+            _, proba[i] = self._predict_sample(sample, self.tree_)
+        return proba
+
+    # TODO: TEST
+    # cpdef np.ndarray predict(self, np.ndarray X):
+    #     predictions = np.zeros(len(X), dtype=int)
+    #     for i, sample in enumerate(X):
+    #         predictions[i], _ = self._predict_sample(sample, self.tree_)
+    #     return predictions
 
     cdef int _predict_sample(self, np.ndarray sample, dict node):
         if node is None:
             raise ValueError("Expected a non-None dictionary node")
-        
+
         if node.get("leaf"):
-            return node["class"]
+            # p_act = node["P_active"]
+            return node["class"] #, [1-p_act, p_act]
 
         if sample[node["split_feature"]] <= node["split_value"]:
             return self._predict_sample(sample, node["left"])

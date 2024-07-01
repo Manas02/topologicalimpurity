@@ -40,7 +40,10 @@ def calculate_percent_activity_cliffs(adj_matrix, y):
     float: Percentage of activity cliffs.
     """
     n_samples = len(y)
-    assert adj_matrix.shape == (n_samples, n_samples), "Adjacency matrix shape does not match the number of samples."
+    assert adj_matrix.shape == (
+        n_samples,
+        n_samples,
+    ), "Adjacency matrix shape does not match the number of samples."
 
     # Count edges between different classes
     different_class_edges = np.sum(adj_matrix * (y[:, None] != y[None, :])) / 2
@@ -67,7 +70,7 @@ def evaluate_models(
     A_train,
     X_test,
     y_test,
-    A_test
+    A_test,
 ):
 
     topo_clf = TopologicalDecisionTreeClassifier(
@@ -90,8 +93,8 @@ def evaluate_models(
     # Calculate evaluation metrics
     metrics = {
         "Dataset": dataset_name,
-        "Percent_Activity_Cliff_train":percent_activity_cliff_train,
-        "Percent_Activity_Cliff_test":percent_activity_cliff_test,
+        "Percent_Activity_Cliff_train": percent_activity_cliff_train,
+        "Percent_Activity_Cliff_test": percent_activity_cliff_test,
         "Sim_threshold": sim_threshold,
         "Molecular_network_Fingeprint": molnet_fp,
         "Model_Fingeprint": model_fp,
@@ -184,7 +187,7 @@ for model_fp in ["rdkit", "maccs", "morgan2", "morgan3"]:
                 A_train,
                 X_test,
                 y_test,
-                A_test
+                A_test,
             )
             logger.critical(
                 f"EVAL DONE...{file_name}|{model_fp=}|{molnet_fp=}|{sim_threshold=}"
